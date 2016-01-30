@@ -1,7 +1,6 @@
 <?php
-
+echo "hello world!";
 ?>
-
 
 <!doctype html>
 <html lang="en">
@@ -77,17 +76,14 @@
                                   </div>
                                   <div class="col-sm-5">
                                       <div class="form-group">
-                                          <label>Rent price</label>
-                                          <div class="input-group">
-                                              <input type="text" class="form-control" placeholder="Rent price per day">
-                                              <span class="input-group-addon">$</span>
-                                          </div>
+                                          <label>Password</label>
+                                              <input type="password" class="form-control" placeholder="">
                                       </div>
                                   </div>
                               </div>
                             </div>
                             <div class="tab-pane" id="table">
-                                <h4 class="info-text">What type of location do you have? </h4>
+                                <h4 class="info-text">Please select a table to analyze</h4>
                                 <div class="row">
                                     <div class="col-sm-10 col-sm-offset-1">
                                         <div class="col-sm-4 col-sm-offset-2">
