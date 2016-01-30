@@ -91,9 +91,9 @@
                                 <h4 class="info-text">Please select a table to analyze</h4>
                                 <div class="row">
 
-                                    <div class="col-sm-5 col-sm-offset-1">
+                                    <div class="col-sm-6 col-sm-offset-3">
                                         <div class="form-group">
-                                            <label>Table</label>
+
                                             <div id="divTableList"></div>
                                         </div>
                                     </div>
