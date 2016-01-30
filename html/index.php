@@ -51,7 +51,7 @@
                                   <div class="col-sm-5 col-sm-offset-1">
                                       <div class="form-group">
                                         <label>Type</label>
-                                          <select name="serverType" class="form-control">
+                                          <select name="serverType" class="form-control" id="serverType">
                                               <option disabled="" selected="">- Server Type -</option>
                                               <option value="Afghanistan"> MySQL </option>
                                               <option value="Albania"> MS SQL </option>
@@ -61,25 +61,25 @@
                                   <div class="col-sm-5">
                                        <div class="form-group">
                                             <label>Server Address</label><br>
-                                            <input type="text" class="form-control" placeholder="IP Address">
+                                            <input type="text" class="form-control" placeholder="IP Address" id="serverAddress">
                                           </div>
                                   </div>
                                   <div class="col-sm-5 col-sm-offset-1">
                                       <div class="form-group">
                                           <label>Username</label>
-                                          <input type="text" class="form-control" placeholder="Username">
+                                          <input type="text" class="form-control" placeholder="Username" id="serverUsername">
                                       </div>
                                   </div>
                                   <div class="col-sm-5">
                                       <div class="form-group">
                                           <label>Password</label>
-                                              <input type="password" class="form-control" placeholder="">
+                                              <input type="password" class="form-control" placeholder="" id="serverPassword">
                                       </div>
                                   </div>
                                   <div class="col-sm-5 col-sm-offset-1">
                                       <div class="form-group">
                                           <label>Database</label>
-                                              <input type="text" class="form-control" placeholder="">
+                                              <input type="text" class="form-control" placeholder="" id="serverDatabase">
                                       </div>
                                   </div>
                               </div>
@@ -236,16 +236,35 @@
             if($tabNum == TabEnum.SERVER){
                 //nothing is really required here
             }
-            elseif($tabNum == TabEnum.TABLE){
-                //do table stuff
+            else if($tabNum == TabEnum.TABLE){
+                establishDatabaseConnection();
             }
-            elseif($tabNum == TabEnum.ANALYSIS){
+            else if($tabNum == TabEnum.ANALYSIS){
                 //do analysis stuff
             }
-            elseif($tabNum == TabEnum.CLASS){
+            else if($tabNum == TabEnum.CLASS){
                 //do class stuff
             }
         }
+
+        function establishDatabaseConnection(){
+            $.ajax({
+                method: "POST",
+                url: "response.php",
+                data: {
+                    action: "table",
+                    serverType: $("#serverType"),
+                    serverAddress: $("#serverAddress"),
+                    serverUsername: $("#serverUsername"),
+                    serverPassword: $("#serverPassword"),
+                    serverDatabase: $("#serverDatabase")
+                }
+            })
+                .done(function( msg ) {
+                    alert( "Connection Attempt Made: " + msg );
+                });
+        }
+
     </script>
 
 </html>
