@@ -40,7 +40,10 @@ $return_array = array();
 switch ($_POST['action']) {
     case 'table':
 
+        $success=false;
         $msg=array();
+        $tableList=array();
+
         $link = $application->AttemptConnection();
 
         if (!$link) {
@@ -48,13 +51,19 @@ switch ($_POST['action']) {
             $msg[].="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
             $msg[].="Debugging error: " . mysqli_connect_error() . PHP_EOL;
         } else {
-            $msg[] = "Success: A proper connection to MySQL was made! The my_db database is great." . PHP_EOL;
-            $msg[].= "Host information: " . mysqli_get_host_info($link) . PHP_EOL;
+            $success=true;
+            $res = mysqli_query($link,"SHOW TABLES");
+            while($cRow = mysqli_fetch_array($res))
+            {
+                $tableList[]=$cRow[0];
+            }
             mysqli_close($link);
         }
         //return a JSON encoded array
         echo json_encode(array(
-                "data" => $msg
+                "data" => $tableList,
+                "success" => $success,
+                "message" => $msg
             )
         );
         break;

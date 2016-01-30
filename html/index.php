@@ -253,11 +253,11 @@
                 url: "response.php",
                 data: {
                     action: "table",
-                    serverType: $("#serverType").val,
-                    serverAddress: $("#serverAddress").val,
-                    serverUsername: $("#serverUsername").val,
-                    serverPassword: $("#serverPassword").val,
-                    serverDatabase: $("#serverDatabase").val
+                    serverType: $("#serverType").val(),
+                    serverAddress: $("#serverAddress").val(),
+                    serverUsername: $("#serverUsername").val(),
+                    serverPassword: $("#serverPassword").val(),
+                    serverDatabase: $("#serverDatabase").val()
                 },
                 dataType: "json"
             })
