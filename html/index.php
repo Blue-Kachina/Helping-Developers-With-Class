@@ -220,7 +220,7 @@
     <script type="text/javascript">
 
         var TabEnum = Object.freeze({SERVER: 1, TABLE: 2, ANALYSIS: 3, CLASS: 4});
-        var $tabNum = TabEnum[1];
+        var $tabNum = 1;
 
         function nextBtn(){
             $tabNum++;
@@ -253,12 +253,13 @@
                 url: "response.php",
                 data: {
                     action: "table",
-                    serverType: $("#serverType"),
-                    serverAddress: $("#serverAddress"),
-                    serverUsername: $("#serverUsername"),
-                    serverPassword: $("#serverPassword"),
-                    serverDatabase: $("#serverDatabase")
-                }
+                    serverType: $("#serverType").val,
+                    serverAddress: $("#serverAddress").val,
+                    serverUsername: $("#serverUsername").val,
+                    serverPassword: $("#serverPassword").val,
+                    serverDatabase: $("#serverDatabase").val
+                },
+                dataType: "json"
             })
                 .done(function( msg ) {
                     alert( "Connection Attempt Made: " + msg );
