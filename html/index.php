@@ -85,31 +85,25 @@
                               </div>
                             </div>
                             <div class="tab-pane" id="table">
+
+
+
                                 <h4 class="info-text">Please select a table to analyze</h4>
                                 <div class="row">
-                                    <div class="col-sm-10 col-sm-offset-1">
-                                        <div class="col-sm-4 col-sm-offset-2">
-                                            <div class="choice" data-toggle="wizard-radio" rel="tooltip" title="Select this option if you have a house.">
-                                                <input type="radio" name="type" value="House">
-                                                <div class="icon">
-                                                    <i class="fa fa-home"></i>
-                                                </div>
-                                                <h6>House</h6>
-                                            </div>
+
+                                    <div class="col-sm-5 col-sm-offset-1">
+                                        <div class="form-group">
+                                            <label>Table</label>
+                                            <div id="divTableList"></div>
                                         </div>
-                                        <div class="col-sm-4">
-                                            <div class="choice" data-toggle="wizard-radio" rel="tooltip" title="Select this option if you have an appartment">
-                                                <input type="radio" name="type" value="Appartment">
-                                                <div class="icon">
-                                                    <i class="fa fa-building"></i>
-                                                </div>
-                                                <h6>Appartment</h6>
-                                            </div>
-                                        </div>
-                                        
                                     </div>
+
                                 </div>
                             </div>
+
+
+
+
                             <div class="tab-pane" id="analysis">
                                 <h4 class="info-text">Tell us more about facilities. </h4>
                                 <div class="row">
@@ -261,8 +255,12 @@
                 },
                 dataType: "json"
             })
-                .done(function( msg ) {
-                    alert( "Connection Attempt Made: " + msg );
+                .success(function( data ) {
+                    var newhtml = data.html;
+                    if(data.message != '') {
+                        alert("Connection Attempt Made: " + data.message);
+                    }
+                    $("#divTableList").replaceWith(newhtml);
                 });
         }
 

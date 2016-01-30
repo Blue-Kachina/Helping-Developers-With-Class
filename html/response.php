@@ -7,11 +7,6 @@
  */
 
 require_once(__DIR__ . '/../lib/classes/server_class.php');
-?>
-<script type="text/javascript">
-    alert("Made it this far");
-</script>
-<?php
 
 if(
     !isset($_POST['serverType'])
@@ -42,26 +37,29 @@ switch ($_POST['action']) {
 
         $success=false;
         $msg=array();
-        $tableList=array();
+        $tableList="";
 
         $link = $application->AttemptConnection();
 
         if (!$link) {
             $msg[]= "Error: Unable to connect to MySQL." . PHP_EOL;
-            $msg[].="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-            $msg[].="Debugging error: " . mysqli_connect_error() . PHP_EOL;
+            $msg[]="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
+            $msg[]="Debugging error: " . mysqli_connect_error() . PHP_EOL;
         } else {
             $success=true;
             $res = mysqli_query($link,"SHOW TABLES");
+
+            $tableList='<select class="form-control">'  . PHP_EOL;
             while($cRow = mysqli_fetch_array($res))
             {
-                $tableList[]=$cRow[0];
+                $tableList .='<option value ="' . $cRow[0] . '">' . $cRow[0] . '</option>'  . PHP_EOL;
             }
+            $tableList .='</select>'  . PHP_EOL;
             mysqli_close($link);
         }
         //return a JSON encoded array
         echo json_encode(array(
-                "data" => $tableList,
+                "html" => $tableList,
                 "success" => $success,
                 "message" => $msg
             )
