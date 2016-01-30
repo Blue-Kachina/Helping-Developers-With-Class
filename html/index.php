@@ -190,7 +190,7 @@
                 establishDatabaseConnection();
             }
             else if($tabNum == TabEnum.CLASS){
-                //do class stuff
+                createClassDeclarations();
             }
         }
 
@@ -214,6 +214,36 @@
                         alert("Connection Attempt Made: " + data.message);
                     }
                     $("#divTableList").replaceWith(newhtml);
+                });
+        }
+
+        function createClassDeclarations(){
+
+            var dbTableName = $("#selectedTable").val();
+
+            $.ajax({
+                method: "POST",
+                url: "response.php",
+                data: {
+                    action: "class",
+                    serverType: $("#serverType").val(),
+                    serverAddress: $("#serverAddress").val(),
+                    serverUsername: $("#serverUsername").val(),
+                    serverPassword: $("#serverPassword").val(),
+                    serverDatabase: $("#serverDatabase").val(),
+                    serverTableName: dbTableName
+                },
+                dataType: "json"
+            })
+                .success(function( data ) {
+                    var class_whole = data.whole;
+                    var class_members = data.members;
+                    if(data.message != '') {
+                        alert("Class creation attempted: " + data.message);
+                    }
+                    $("#class_whole").val(class_whole);
+                    $("#class_members").val(class_members);
+                    $("#class_content").val(class_whole);
                 });
         }
 
