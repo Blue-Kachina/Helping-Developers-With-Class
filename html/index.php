@@ -1,7 +1,3 @@
-<?php
-echo "hello world!";
-?>
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -78,6 +74,12 @@ echo "hello world!";
                                       <div class="form-group">
                                           <label>Password</label>
                                               <input type="password" class="form-control" placeholder="">
+                                      </div>
+                                  </div>
+                                  <div class="col-sm-5 col-sm-offset-1">
+                                      <div class="form-group">
+                                          <label>Database</label>
+                                              <input type="text" class="form-control" placeholder="">
                                       </div>
                                   </div>
                               </div>
@@ -176,12 +178,12 @@ echo "hello world!";
                         </div>
                         <div class="wizard-footer">
                             	<div class="pull-right">
-                                    <input type='button' class='btn btn-next btn-fill btn-success btn-wd btn-sm' name='next' value='Next' />
+                                    <input type='button' class='btn btn-next btn-fill btn-success btn-wd btn-sm' name='next' value='Next' onclick="nextBtn()" />
                                     <input type='button' class='btn btn-finish btn-fill btn-success btn-wd btn-sm' name='finish' value='Finish' />
         
                                 </div>
                                 <div class="pull-left">
-                                    <input type='button' class='btn btn-previous btn-fill btn-default btn-wd btn-sm' name='previous' value='Previous' />
+                                    <input type='button' class='btn btn-previous btn-fill btn-default btn-wd btn-sm' name='previous' value='Previous'  onclick="prevBtn()" />
                                 </div>
                                 <div class="clearfix"></div>
                         </div>	
@@ -213,5 +215,37 @@ echo "hello world!";
 	
 	<!--  methods for manipulating the wizard and the validation -->
 	<script src="assets/js/wizard.js"></script>
+
+
+    <script type="text/javascript">
+
+        var TabEnum = Object.freeze({SERVER: 1, TABLE: 2, ANALYSIS: 3, CLASS: 4});
+        var $tabNum = TabEnum[1];
+
+        function nextBtn(){
+            $tabNum++;
+            performPageSpecificLogic();
+        }
+
+        function prevBtn(){
+            $tabNum--;
+            performPageSpecificLogic();
+        }
+
+        function performPageSpecificLogic(){
+            if($tabNum == TabEnum.SERVER){
+                //nothing is really required here
+            }
+            elseif($tabNum == TabEnum.TABLE){
+                //do table stuff
+            }
+            elseif($tabNum == TabEnum.ANALYSIS){
+                //do analysis stuff
+            }
+            elseif($tabNum == TabEnum.CLASS){
+                //do class stuff
+            }
+        }
+    </script>
 
 </html>
