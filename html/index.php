@@ -39,7 +39,6 @@
                     	<ul>
                             <li><a href="#server" data-toggle="tab">Server</a></li>
                             <li><a href="#table" data-toggle="tab">Table</a></li>
-                            <li><a href="#analysis" data-toggle="tab">Analysis</a></li>
                             <li><a href="#class" data-toggle="tab">Class</a></li>
                         </ul>
                         <div class="tab-content">
@@ -53,8 +52,8 @@
                                         <label>Type</label>
                                           <select name="serverType" class="form-control" id="serverType">
                                               <option disabled="" selected="">- Server Type -</option>
-                                              <option value="Afghanistan"> MySQL </option>
-                                              <option value="Albania"> MS SQL </option>
+                                              <option value="mysql"> MySQL </option>
+                                              <option value="mssql"> MS SQL </option>
                                           </select>
                                       </div>
                                   </div>
@@ -102,69 +101,27 @@
                             </div>
 
 
-
-
-                            <div class="tab-pane" id="analysis">
-                                <h4 class="info-text">Tell us more about facilities. </h4>
-                                <div class="row">
-                                    <div class="col-sm-5 col-sm-offset-1">
-                                      <div class="form-group">
-                                          <label>Your place is good for</label>
-                                          <select class="form-control">
-                                            <option disabled="" selected="">- type -</option>
-                                            <option>Business</option>
-                                            <option>Vacation </option>
-                                            <option>Work</option>
-                                          </select>
-                                      </div>
-                                    </div>
-                                    <div class="col-sm-5">
-                                      <div class="form-group">
-                                          <label>Is air conditioning included ?</label>
-                                          <select class="form-control">
-                                            <option disabled="" selected="">- response -</option>
-                                            <option>Yes</option>
-                                            <option>No </option>
-                                          </select>
-                                      </div>
-                                     </div>
-                                     <div class="col-sm-5 col-sm-offset-1">
-                                      <div class="form-group">
-                                          <label>Does your place have wi-fi?</label>
-                                          <select class="form-control">
-                                            <option disabled="" selected="">- response -</option>
-                                            <option>Yes</option>
-                                            <option>No </option>
-                                          </select>
-                                       </div>
-                                      </div>
-                                      <div class="col-sm-5">
-                                       <div class="form-group">
-                                          <label>Is breakfast included?</label>
-                                          <select class="form-control">
-                                            <option disabled="" selected="">- response -</option>
-                                            <option>Yes</option>
-                                            <option>No </option>
-                                          </select>
-                                       </div>
-                                      </div>
-                                </div>
-                            </div>
                             <div class="tab-pane" id="class">
                                 <div class="row">
-                                    <h4 class="info-text"> Drop us a small description. </h4>
-                                    <div class="col-sm-6 col-sm-offset-1">
+                                    <h4 class="info-text"> Which part of the class would you like assistance with? </h4>
+                                    <div class="col-sm-10 col-sm-offset-1">
                                          <div class="form-group">
-                                            <label>Place description</label>
-                                            <textarea class="form-control" placeholder="" rows="9">
+                                             <select class="form-control" name="classPart" id="classPart">
+                                                 <option disabled="" selected="">- Class Part -</option>
+                                                 <option value="whole"> Whole Class </option>
+                                                 <option value="members"> Members Only </option>
+                                                 <option value="load"> Load Only </option>
+                                                 <option value="save"> Save Only </option>
+                                             </select>
+
+                                             <input type="hidden" id="class_whole">
+                                             <input type="hidden" id="class_members">
+                                             <input type="hidden" id="class_load">
+                                             <input type="hidden" id="class_save">
+
+                                            <textarea class="form-control" placeholder="" rows="8" id="class_content">
                                                 
                                             </textarea>
-                                          </div>
-                                    </div>
-                                    <div class="col-sm-4">
-                                         <div class="form-group">
-                                            <label>Example</label>
-                                            <p class="description">"The place is really nice. We use it every sunday when we go fishing. It is so awesome."</p>
                                           </div>
                                     </div>
                                 </div>
@@ -173,7 +130,6 @@
                         <div class="wizard-footer">
                             	<div class="pull-right">
                                     <input type='button' class='btn btn-next btn-fill btn-success btn-wd btn-sm' name='next' value='Next' onclick="nextBtn()" />
-                                    <input type='button' class='btn btn-finish btn-fill btn-success btn-wd btn-sm' name='finish' value='Finish' />
         
                                 </div>
                                 <div class="pull-left">
@@ -213,7 +169,7 @@
 
     <script type="text/javascript">
 
-        var TabEnum = Object.freeze({SERVER: 1, TABLE: 2, ANALYSIS: 3, CLASS: 4});
+        var TabEnum = Object.freeze({SERVER: 1, TABLE: 2, CLASS: 3});
         var $tabNum = 1;
 
         function nextBtn(){
@@ -232,9 +188,6 @@
             }
             else if($tabNum == TabEnum.TABLE){
                 establishDatabaseConnection();
-            }
-            else if($tabNum == TabEnum.ANALYSIS){
-                //do analysis stuff
             }
             else if($tabNum == TabEnum.CLASS){
                 //do class stuff
