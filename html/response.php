@@ -145,6 +145,7 @@ switch ($_POST['action']) {
         echo json_encode(array(
                 "whole" => $class_whole,
                 "members" => $class_members,
+                "load" => $class_load,
                 "success" => $success,
                 "message" => $msg
             )

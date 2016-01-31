@@ -87,7 +87,7 @@
 
 
 
-                                <h4 class="info-text">Please select a table to analyze</h4>
+                                <h4 class="info-text">Please select a table to create a class declaration for</h4>
                                 <div class="row">
 
                                     <div class="col-sm-6 col-sm-offset-3">
@@ -106,7 +106,7 @@
                                     <h4 class="info-text"> Which part of the class would you like assistance with? </h4>
                                     <div class="col-sm-10 col-sm-offset-1">
                                          <div class="form-group">
-                                             <select class="form-control" name="classPart" id="classPart">
+                                             <select class="form-control" name="classPart" id="classPart" onchange="classPartSelected(this)">
                                                  <option disabled="" selected="">- Class Part -</option>
                                                  <option value="whole"> Whole Class </option>
                                                  <option value="members"> Members Only </option>
@@ -238,13 +238,22 @@
                 .success(function( data ) {
                     var class_whole = data.whole;
                     var class_members = data.members;
+                    var class_load = data.load;
                     if(data.message != '') {
                         alert("Class creation attempted: " + data.message);
                     }
                     $("#class_whole").val(class_whole);
                     $("#class_members").val(class_members);
-                    $("#class_content").val(class_whole);
+                    $("#class_load").val(class_load);
+
                 });
+        }
+
+
+        function classPartSelected(partName){
+            var selectedIndexForThisPart = '#class_' + partName.options[partName.selectedIndex].value;
+            var newContent =
+            $("#class_content").val($(selectedIndexForThisPart).val());
         }
 
     </script>
