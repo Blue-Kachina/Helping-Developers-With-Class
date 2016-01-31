@@ -106,7 +106,7 @@
                                     <h4 class="info-text"> Which part of the class would you like assistance with? </h4>
                                     <div class="col-sm-10 col-sm-offset-1">
                                          <div class="form-group">
-                                             <select class="form-control" name="classPart" id="classPart" onchange="classPartSelected(this)">
+                                             <select class="form-control" name="classPartToGenerate" id="classPartToGenerate" onchange="classPartSelected(this)">
                                                  <option disabled="" selected="">- Class Part -</option>
                                                  <option value="whole"> Whole Class </option>
                                                  <option value="members"> Members Only </option>
@@ -130,6 +130,7 @@
                         <div class="wizard-footer">
                             	<div class="pull-right">
                                     <input type='button' class='btn btn-next btn-fill btn-success btn-wd btn-sm' name='next' value='Next' onclick="nextBtn()" />
+                                    <input type='button' class='btn btn-finish btn-fill btn-success btn-wd btn-sm' id='Copy' name='Copy' value='Copy' data-clipboard-target="#class_content" />
         
                                 </div>
                                 <div class="pull-left">
@@ -155,7 +156,9 @@
 </body>
 
     <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
+    <script src="assets/js/jquery-ui-1.11.0.js" type="text/javascript"></script>
 	<script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="assets/js/clipboard.js" type="text/javascript"></script>
 		
 	<!--   plugins 	 -->
 	<script src="assets/js/jquery.bootstrap.wizard.js" type="text/javascript"></script>
@@ -217,7 +220,7 @@
                 });
         }
 
-        function createClassDeclarations(){
+        function createClassDeclarations() {
 
             var dbTableName = $("#selectedTable").val();
 
@@ -249,9 +252,12 @@
                     $("#class_content").val(class_whole);
 
                     // Get <select> object
-                    var sel = $('#classPart');
+                    var sel = $('#classPartToGenerate');
                     // Select index
-                    sel.val('whole').selectmenu('refresh', true);
+
+                    sel.val('whole');
+
+
                 });
         }
 
@@ -261,6 +267,13 @@
             var newContent =
             $("#class_content").val($(selectedIndexForThisPart).val());
         }
+
+
+
+        $( document ).ready(function() {
+            new Clipboard('#Copy');
+        });
+
 
     </script>
 
