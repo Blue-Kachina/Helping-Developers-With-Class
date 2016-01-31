@@ -108,7 +108,7 @@ switch ($_POST['action']) {
             if ($result = mysqli_query($link,$query)) {;
 
 
-                $class_members  = '//' . str_repeat("\t",3) . 'Field' . str_repeat("\t",5) . 'Type' . str_repeat("\t",9) . 'Null' . str_repeat("\t",8) . 'Key' . str_repeat("\t",10) . 'Default' . str_repeat("\t",9) . 'Extra' . PHP_EOL;
+                $class_members  = '//' . str_repeat("\t",3) . 'Field' . str_repeat("\t",7) . 'Type' . str_repeat("\t",9) . 'Null' . str_repeat("\t",8) . 'Key' . str_repeat("\t",10) . 'Default' . str_repeat("\t",9) . 'Extra' . PHP_EOL;
                 $class_members .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
 
                 for ($i = 0; $row[] = mysqli_fetch_assoc($result); ++$i)  //Field, Type, Null, Key, Default, Extra
@@ -123,11 +123,11 @@ switch ($_POST['action']) {
 
 
                     $class_members .= '    public $' . $myField . ';'
-                        . str_repeat("\t", 10 - (13 + 1 + strlen($myField)) / 4 ) . '//' . $myType
-                        . str_repeat("\t", 10 - (strlen($myType)    -1 ) / 4 ) . $myNull
-                        . str_repeat("\t", 10 - (strlen($myNull)    -1 ) / 4 ) . $myKey
-                        . str_repeat("\t", 10 - (strlen($myKey)     -1) / 4 ) . $myDefault
-                        . str_repeat("\t", 10 - (strlen($myDefault) -1) / 4 ) . $myExtra
+                        . str_repeat("\t", numTabStopsToUse(15,25 + 1 + strlen($myField))) . '//' . $myType
+                        . str_repeat("\t", numTabStopsToUse(10,strlen($myType)-1)) . $myNull
+                        . str_repeat("\t", numTabStopsToUse(10,strlen($myNull)-1)) . $myKey
+                        . str_repeat("\t", numTabStopsToUse(10,strlen($myKey)-1)) . $myDefault
+                        . str_repeat("\t", numTabStopsToUse(10,strlen($myDefault)-1)) . $myExtra
                         . PHP_EOL; //10 Tab stops from the far left, 13 characters added to the field name, zero-based, each tab stop is akin to 4 characters
                     if (isset($row['Key']) && $row['Key'] == 'PRI') {
                         $key_field_index[] = $i;
@@ -170,4 +170,10 @@ switch ($_POST['action']) {
             )
         );
         break;
+}
+
+function numTabStopsToUse($numTabsWithoutText, $lengthOfText){
+    $numCharsPerTab = 4;
+    $bestGuess =  $numTabsWithoutText - $lengthOfText / $numCharsPerTab ;
+    return $bestGuess > 0? $bestGuess : 0;
 }
