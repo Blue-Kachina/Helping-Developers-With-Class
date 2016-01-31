@@ -246,6 +246,12 @@
                     $("#class_members").val(class_members);
                     $("#class_load").val(class_load);
 
+                    $("#class_content").val(class_whole);
+
+                    // Get <select> object
+                    var sel = $('#classPart');
+                    // Select index
+                    sel.val('whole').selectmenu('refresh', true);
                 });
         }
 

@@ -108,7 +108,8 @@ switch ($_POST['action']) {
             if ($result = mysqli_query($link,$query)) {;
 
 
-                $class_members  = '//' . str_repeat("\t",3) . 'Field' . str_repeat("\t",5) . 'Type' . str_repeat("\t",9) . 'Null' . str_repeat("\t",8) . 'Key' . str_repeat("\t",9) . 'Default' . str_repeat("\t",8) . 'Extra' . PHP_EOL;
+                $class_members  = '//' . str_repeat("\t",3) . 'Field' . str_repeat("\t",5) . 'Type' . str_repeat("\t",9) . 'Null' . str_repeat("\t",8) . 'Key' . str_repeat("\t",10) . 'Default' . str_repeat("\t",9) . 'Extra' . PHP_EOL;
+                $class_members .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
 
                 for ($i = 0; $row[] = mysqli_fetch_assoc($result); ++$i)  //Field, Type, Null, Key, Default, Extra
                 {
