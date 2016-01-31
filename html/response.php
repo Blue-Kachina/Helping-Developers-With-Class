@@ -109,7 +109,8 @@ switch ($_POST['action']) {
                 for ($i = 0; $row[] = mysqli_fetch_assoc($result); ++$i)  //Field, Type, Null, Key, Default, Extra
                 {
                     //print_r($row);
-                    $class_members .= '    public $' . $row[$i]['Field'] . ';                     //' . $row[$i]['Type'] . PHP_EOL;
+                    $myName = $row[$i]['Field'];
+                    $class_members .= '    public $' . $row[$i]['Field'] . ';' . str_repeat("\t", 10 - (14+ strlen($myName)) / 4 ) . '//' . $row[$i]['Type'] . PHP_EOL;
                     if (isset($row['Key']) && $row['Key'] == 'PRI') {
                         $key_field_index[] = $i;
                     }
