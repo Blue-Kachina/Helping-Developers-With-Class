@@ -23,34 +23,36 @@ if(
 }
 
 //create a new server connection
-$application = new Server_Class($_POST['serverType'],$_POST['serverAddress'],$_POST['serverUsername'],$_POST['serverPassword'],$_POST['serverDatabase']);
-$row_count = 0;
-$return_array = array();
+$connection = new Server_Class($_POST['serverType'],$_POST['serverAddress'],$_POST['serverUsername'],$_POST['serverPassword'],$_POST['serverDatabase']);
 
 switch ($_POST['action']) {
     //During the action of switching to the table tab we will be looking up a list of tables, and populating a select control with them
     case 'table':
 
         $success=false;
-        $msg=array();
+        $msg="";
         $tableList="";
 
         //Invoke the server's connection attempt method
-        $link = $application->AttemptConnection();
+        $link = $connection->AttemptConnection();
 
         //Ensure that any failed connection attempts get reported to the user
         if (!$link) {
-            $msg[]= "Error: Unable to connect to MySQL." . PHP_EOL;
-            $msg[]="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-            $msg[]="Debugging error: " . mysqli_connect_error() . PHP_EOL;
+            $msg = "Error: Unable to connect to MySQL." . PHP_EOL;
+            $msg .="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
+            $msg .="Debugging error: " . mysqli_connect_error() . PHP_EOL;
+
+//            header('HTTP/1.1 500 Internal Server Booboo');
+//            header('Content-Type: application/json; charset=UTF-8');
+//            die(json_encode(array('message' => $msg , 'code' => 1337)));
         } else {
         //Connection was successful.  Start building HTML that will replace a currently empty div
             $success=true;
             $res = mysqli_query($link,"SHOW TABLES");
             $tableList='<select id="selectedTable" class="form-control">'  . PHP_EOL;
-            while($cRow = mysqli_fetch_array($res))
+            while($row = mysqli_fetch_array($res))
             {
-                $tableList .='<option value ="' . $cRow[0] . '">' . $cRow[0] . '</option>'  . PHP_EOL;
+                $tableList .='<option value ="' . $row[0] . '">' . $row[0] . '</option>'  . PHP_EOL;
             }
             $tableList .='</select>'  . PHP_EOL;
             mysqli_close($link);
@@ -67,7 +69,7 @@ switch ($_POST['action']) {
     case 'class':
         //During the action of switching to the class tab we will be looking up a list of columns in the selected table, and retrieving the metadata necessary for generating class declarations that can be used to create objects modeled after them.
         $success=false;
-        $msg=array();
+        $msg='';
         $tableName='';
         $class_whole='';
         $class_members='';
@@ -81,18 +83,17 @@ switch ($_POST['action']) {
             $tableName = $_POST['serverTableName'];
         }
         else{
-            $msg[]= "No table was selected." . PHP_EOL;
-            exit();
+            $msg = "No table was selected." . PHP_EOL;
         }
 
         //Invoke the server's connection attempt method
-        $link = $application->AttemptConnection();
+        $link = $connection->AttemptConnection();
 
         //Ensure that any failed connection attempts get reported to the user
         if (!$link) {
-            $msg[]= "Error: Unable to connect to MySQL." . PHP_EOL;
-            $msg[]="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-            $msg[]="Debugging error: " . mysqli_connect_error() . PHP_EOL;
+            $msg = "Error: Unable to connect to MySQL." . PHP_EOL;
+            $msg .="Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
+            $msg .="Debugging error: " . mysqli_connect_error() . PHP_EOL;
         } else {
             $success=true;
 

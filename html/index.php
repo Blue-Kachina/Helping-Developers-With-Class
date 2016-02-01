@@ -51,22 +51,21 @@
                                       <div class="form-group">
                                         <label>Type</label>
                                           <select name="serverType" class="form-control" id="serverType">
-                                              <option disabled="" selected="">- Server Type -</option>
-                                              <option value="mysql"> MySQL </option>
-                                              <option value="mssql"> MS SQL </option>
+                                              <option disabled="">- Server Type -</option>
+                                              <option value="mysql" selected="selected"> MySQL </option>
                                           </select>
                                       </div>
                                   </div>
                                   <div class="col-sm-5">
                                        <div class="form-group">
                                             <label>Server Address</label><br>
-                                            <input type="text" class="form-control" placeholder="IP Address" id="serverAddress">
+                                            <input type="text" class="form-control" placeholder="localhost" id="serverAddress">
                                           </div>
                                   </div>
                                   <div class="col-sm-5 col-sm-offset-1">
                                       <div class="form-group">
                                           <label>Username</label>
-                                          <input type="text" class="form-control" placeholder="Username" id="serverUsername">
+                                          <input type="text" class="form-control" placeholder="" id="serverUsername">
                                       </div>
                                   </div>
                                   <div class="col-sm-5">
@@ -212,13 +211,23 @@
                 dataType: "json"
             })
                 .success(function( data ) {
-                    var newhtml = data.html;
-                    if(data.message != '') {
-                        alert("Connection Attempt Made: " + data.message);
+                    if(data.success) {
+                        var newhtml = data.html;
+                        if (data.message != '') {
+                            alert("Connection Attempt Made: " + data.message);
+                        }
+                        $("#divTableList").replaceWith(newhtml);
                     }
-                    $("#divTableList").replaceWith(newhtml);
+                    else
+                    {
+                        if (data.message != '') {
+                            alert("Connection Attempt Made: " + data.message);
+                            event.preventDefault();
+                        }
+                        event.preventDefault();
+                    }
                 });
-        }
+            }
 
         function createClassDeclarations() {
 
@@ -239,23 +248,33 @@
                 dataType: "json"
             })
                 .success(function( data ) {
-                    var class_whole = data.whole;
-                    var class_members = data.members;
-                    var class_load = data.load;
-                    if(data.message != '') {
-                        alert("Class creation attempted: " + data.message);
+
+                    if(data.success) {
+                        var class_whole = data.whole;
+                        var class_members = data.members;
+                        var class_load = data.load;
+                        if (data.message != '') {
+                            alert("Class creation attempted: " + data.message);
+                        }
+                        $("#class_whole").val(class_whole);
+                        $("#class_members").val(class_members);
+                        $("#class_load").val(class_load);
+
+                        $("#class_content").val(class_whole);
+
+                        // Get <select> object
+                        var sel = $('#classPartToGenerate');
+                        // Select index
+
+                        sel.val('whole');
                     }
-                    $("#class_whole").val(class_whole);
-                    $("#class_members").val(class_members);
-                    $("#class_load").val(class_load);
-
-                    $("#class_content").val(class_whole);
-
-                    // Get <select> object
-                    var sel = $('#classPartToGenerate');
-                    // Select index
-
-                    sel.val('whole');
+                    else
+                    {
+                        if (data.message != '') {
+                            alert("Class creation attempted: " + data.message);
+                        }
+                        event.preventDefault();
+                    }
 
 
                 });
