@@ -52,7 +52,10 @@ switch ($_POST['action']) {
             $tableList='<select id="selectedTable" class="form-control">'  . PHP_EOL;
             while($row = mysqli_fetch_array($res))
             {
-                $tableList .='<option value ="' . $row[0] . '">' . $row[0] . '</option>'  . PHP_EOL;
+                //$tableList .='<option value ="' . $row[0] . '">' . $row[0] . '</option>'  . PHP_EOL;
+               $tableList .=<<<TABLELIST
+                        <option value ="$row[0]">$row[0]</option>
+TABLELIST;
             }
             $tableList .='</select>'  . PHP_EOL;
             mysqli_close($link);
