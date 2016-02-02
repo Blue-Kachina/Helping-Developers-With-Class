@@ -155,7 +155,6 @@
 </body>
 
     <script src="assets/js/jquery-1.10.2.js" type="text/javascript"></script>
-    <script src="assets/js/jquery-ui-1.11.0.js" type="text/javascript"></script>
 	<script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
 	<script src="assets/js/clipboard.js" type="text/javascript"></script>
 		
@@ -208,9 +207,8 @@
                     serverPassword: $("#serverPassword").val(),
                     serverDatabase: $("#serverDatabase").val()
                 },
-                dataType: "json"
-            })
-                .success(function( data ) {
+                dataType: "json",
+                success: function( data ) {
                     if(data.success) {
                         var newhtml = data.html;
                         if (data.message != '') {
@@ -226,7 +224,9 @@
                         }
                         event.preventDefault();
                     }
-                });
+                }
+            })
+
             }
 
         function createClassDeclarations() {
@@ -245,9 +245,8 @@
                     serverDatabase: $("#serverDatabase").val(),
                     serverTableName: dbTableName
                 },
-                dataType: "json"
-            })
-                .success(function( data ) {
+                dataType: "json",
+                success: function( data ) {
 
                     if(data.success) {
                         var class_whole = data.whole;
@@ -277,7 +276,9 @@
                     }
 
 
-                });
+                }
+            })
+
         }
 
 

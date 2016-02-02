@@ -6,7 +6,7 @@
  * Time: 10:41 PM
  */
 
-Class Server_Class {
+Class DB_Connection {
     var $type;
     var $address;
     var $username;
