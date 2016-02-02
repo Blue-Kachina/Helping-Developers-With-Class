@@ -198,7 +198,7 @@
         function establishDatabaseConnection(){
             $.ajax({
                 method: "POST",
-                url: "response.php",
+                url: "ajax.php",
                 data: {
                     action: "table",
                     serverType: $("#serverType").val(),
@@ -235,7 +235,7 @@
 
             $.ajax({
                 method: "POST",
-                url: "response.php",
+                url: "ajax.php",
                 data: {
                     action: "class",
                     serverType: $("#serverType").val(),
