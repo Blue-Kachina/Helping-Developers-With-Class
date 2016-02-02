@@ -47,7 +47,6 @@ Class user EXTENDS {$this->table} {
 CLASS_DECLARATION;
     }
 
-
     public function GetDeclaration_Members(){
         $widthInTabStops = 10;
 
@@ -99,9 +98,5 @@ CLASS_DECLARATION;
         $myTrailingTabSpace = str_repeat("\t", $nTabStops - (floor(strlen($myString)/4) ) );
         return $myString . $myTrailingTabSpace;
     }
-
-    //ToDo: Include some templates of the various class parts using heredoc
-
-
 
 }

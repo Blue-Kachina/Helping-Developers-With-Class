@@ -270,7 +270,7 @@
                     else
                     {
                         if (data.message != '') {
-                            alert("Class creation attempted: " + data.message);
+                            alert("Error: " + data.message);
                         }
                         event.preventDefault();
                     }
