@@ -92,10 +92,13 @@ switch ($_POST['action']) {
         //$result = $connection->ReturnCustomQueryResults($query);
         $result = $connection->ReturnColumnData();
             if ($result) {
-                for ($set = array(); $row = mysqli_fetch_array($result, MYSQLI_ASSOC); $set[] = $row) ;
-                {
-                }
-                $template = new ClassTemplate($tableName, $set);
+
+                //var_dump($result);
+//                for ($set = array(); $row = mysqli_fetch_array($result, MYSQLI_ASSOC); $set[] = $row) ;
+//                {
+//                }
+                $template = new ClassTemplate($tableName, $result);
+                $template->SetAllColumns($result);
                 $class_members = $template->GetDeclaration_Members();
                 $class_load = $template->GetDeclaration_Load();
                 $class_whole = $template->GetDeclaration_WholeClass();

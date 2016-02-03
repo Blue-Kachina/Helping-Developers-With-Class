@@ -64,47 +64,13 @@ Class DB_Connection {
         if (!$this->attempt)
             return false;
 
-        $query = "SHOW COLUMNS IN " . filter_var($this->table,FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-        $res = mysqli_query($this->attempt, $query);
-        while ($columnData[] .= mysqli_fetch_assoc($res)) {
-        }
-            //$columnData[] .= $row;
-            return $columnData;
+        $query = "SHOW COLUMNS IN " . filter_var($this->table, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
+        if ($result = mysqli_query($this->attempt, $query)) {
+            return mysqli_fetch_all($result,MYSQLI_ASSOC);
 
-            /*Parameterized Query Not Working
-            $query="SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = ? AND table_schema = ?";
-
-            $this->mysqli= new mysqli($this->address,$this->username,$this->password,$this->database);
-
-            if(mysqli_connect_errno()){
-                $this->lastErrorMessage = "Connect failed:" . PHP_EOL .
-                    mysqli_connect_error();
-                return false;
-            }
-
-            $myTable = $this->table;
-            $myDatabase = $this->database;
-
-
-    //echo $query;
-            if($stmt = $this->mysqli->prepare($query)){
-                $stmt->bind_param('ss',$myTable,$myDatabase);
-    //echo !$stmt ? 'failed to bind' : '';
-                $stmt->execute();
-                $stmt->store_result();
-    //echo !$stmt ? 'failed to execute' : '';
-                $stmt->bind_result($field,$type,$null,$default);
-    //echo !$stmt ? 'failed to bind result' : '';
-                $stmt->get_result();
-                while ($row = $stmt->fe){
-                    $columnData[] .=array("Field"=>$field,"Type"=>$type,"Null"=>$null,"Default"=>$default);
-                }
-                $stmt->close();
-            }
-            return $columnData;
-            */
-        }
+        }else return false;
+    }
 
 
 

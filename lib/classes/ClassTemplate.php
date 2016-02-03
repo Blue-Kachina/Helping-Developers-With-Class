@@ -34,6 +34,10 @@ Class ClassTemplate {
         }
     }
 
+    public function SetAllColumns($allColumns){
+        $this->columns=$allColumns;
+    }
+
     public function GetDeclaration_WholeClass(){
         return <<<CLASS_DECLARATION
 <?php
@@ -52,14 +56,14 @@ CLASS_DECLARATION;
 
         //Template the member declaration column headers
         $output = PHP_EOL;
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('            ' . 'Field', $widthInTabStops);
+        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('//            ' . 'Field', $widthInTabStops);
         $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Type', $widthInTabStops);
         $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Null', $widthInTabStops);
         $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Key', $widthInTabStops);
         $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Default', $widthInTabStops);
         $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Extra', $widthInTabStops);
         $output .= PHP_EOL;
-        $output .= '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
+        $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
         foreach($this->columns as $index => $column) {
@@ -94,8 +98,10 @@ CLASS_DECLARATION;
         return $output;
     }
 
-    private function Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($myString, $nTabStops){
-        $myTrailingTabSpace = str_repeat("\t", $nTabStops - (floor(strlen($myString)/4) ) );
+    private static function Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($myString, $nTabStops){
+        $numRepetitionsGuess =$nTabStops - (floor(strlen($myString)/4)) ;
+        $numRepetitions= $numRepetitionsGuess >0 ? $numRepetitionsGuess : 0 ;
+        $myTrailingTabSpace = str_repeat("\t", $numRepetitions );
         return $myString . $myTrailingTabSpace;
     }
 
