@@ -56,50 +56,75 @@ Class DB_Connection {
         return $this->result;
     }
 
-    public function ReturnColumnData(){
-        $columnData=array();
-        $query=<<<QUERY_TEXT
-SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE table_name = ?
-  AND table_schema = ?
-QUERY_TEXT;
+    public function ReturnColumnData()
+    {
+        $columnData = array();
 
+        $this->AttemptConnection();
+        if (!$this->attempt)
+            return false;
 
-        $this->mysqli= new mysqli($this->address,$this->username,$this->password,$this->database);
-        $stmt = $this->mysqli->stmt_init();
-        $myTable = $this->table;
-        $myDatabase = $this->database;
-
-
-//echo $query;
-        if($stmt->prepare($query)){
-            $stmt->bind_param('ss',$myTable,$myDatabase);
-//echo !$stmt ? 'failed to bind' : '';
-            $stmt->execute();
-//echo !$stmt ? 'failed to execute' : '';
-            $stmt->bind_result($field,$type,$null,$default);
-//echo !$stmt ? 'failed to bind result' : '';
-            while ($stmt->fetch()){
-                $columnData[] .=array("Field"=>$field,"Type"=>$type,"Null"=>$null,"Default"=>$default);
-            }
-            $stmt->close();
+        $query = "SHOW COLUMNS IN " . filter_var($this->table,FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+        $res = mysqli_query($this->attempt, $query);
+        while ($columnData[] .= mysqli_fetch_assoc($res)) {
         }
-        return $columnData;
-    }
+            //$columnData[] .= $row;
+            return $columnData;
+
+
+            /*Parameterized Query Not Working
+            $query="SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = ? AND table_schema = ?";
+
+            $this->mysqli= new mysqli($this->address,$this->username,$this->password,$this->database);
+
+            if(mysqli_connect_errno()){
+                $this->lastErrorMessage = "Connect failed:" . PHP_EOL .
+                    mysqli_connect_error();
+                return false;
+            }
+
+            $myTable = $this->table;
+            $myDatabase = $this->database;
+
+
+    //echo $query;
+            if($stmt = $this->mysqli->prepare($query)){
+                $stmt->bind_param('ss',$myTable,$myDatabase);
+    //echo !$stmt ? 'failed to bind' : '';
+                $stmt->execute();
+                $stmt->store_result();
+    //echo !$stmt ? 'failed to execute' : '';
+                $stmt->bind_result($field,$type,$null,$default);
+    //echo !$stmt ? 'failed to bind result' : '';
+                $stmt->get_result();
+                while ($row = $stmt->fe){
+                    $columnData[] .=array("Field"=>$field,"Type"=>$type,"Null"=>$null,"Default"=>$default);
+                }
+                $stmt->close();
+            }
+            return $columnData;
+            */
+        }
+
+
+
 
     public function returnTableNameOptions()
     {
         $tableList="";
-        $attempt = $this->AttemptConnection();
-        if (!$attempt)
+        $this->attempt = $this->AttemptConnection();
+        if (!$this->attempt)
             return false;
 
-        $query =
+        $query = "SHOW TABLES";
+        /*$query =
             'SELECT DISTINCT TABLE_NAME' . PHP_EOL .
-            'FROM INFORMATION_SCHEMA.COLUMNS';
+            'FROM INFORMATION_SCHEMA.COLUMNS' . PHP_EOL ;
+        */
 
-        $res = mysqli_query($attempt, $query);
+        $res = mysqli_query($this->attempt, $query);
+        //printf("Error: %s\n", mysqli_error($res));
+
         while ($row = mysqli_fetch_array($res)) {
             $tableList .=
 <<<TABLELIST
@@ -108,5 +133,25 @@ TABLELIST;
         }
         return $tableList;
     }
+
+    /*Not Yet Implemented
+    public function sanitizeMe($stringToSanitize){
+        $inputType=gettype($stringToSanitize);
+        switch($inputType){
+            case 'NULL':
+
+            case 'boolean':
+            case 'boolean':
+            case 'boolean':
+            case 'boolean':
+            case 'boolean':
+            case 'boolean':
+            case 'boolean':
+            case 'boolean':
+                break;
+        }
+
+    }
+    */
 
 }
