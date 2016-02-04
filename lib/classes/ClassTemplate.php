@@ -44,7 +44,7 @@ Class ClassTemplate {
 require_once('Table.php');
 
 
-Class user EXTENDS {$this->table} {
+Class {$this->table} EXTENDS Table  {
 {$this->GetDeclaration_Members()}
 {$this->GetDeclaration_Load()}
 }

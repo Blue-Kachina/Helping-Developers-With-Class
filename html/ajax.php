@@ -88,15 +88,8 @@ switch ($_POST['action']) {
 
         $success = true;
 
-        //$query = "SHOW COLUMNS IN " . $tableName;
-        //$result = $connection->ReturnCustomQueryResults($query);
         $result = $connection->ReturnColumnData();
             if ($result) {
-
-                //var_dump($result);
-//                for ($set = array(); $row = mysqli_fetch_array($result, MYSQLI_ASSOC); $set[] = $row) ;
-//                {
-//                }
                 $template = new ClassTemplate($tableName, $result);
                 $template->SetAllColumns($result);
                 $class_members = $template->GetDeclaration_Members();
@@ -106,7 +99,6 @@ switch ($_POST['action']) {
         else{
             $msg .= $connection->GetLastErrorMessage();
         }
-
 
         //return a JSON encoded array
         echo json_encode(array(
@@ -118,11 +110,4 @@ switch ($_POST['action']) {
             )
         );
         break;
-}
-
-function numTabStopsToUse($numTabsWithoutText, $lengthOfText)
-{
-    $numCharsPerTab = 4;
-    $bestGuess = $numTabsWithoutText - $lengthOfText / $numCharsPerTab;
-    return $bestGuess > 0 ? $bestGuess : 0;
 }

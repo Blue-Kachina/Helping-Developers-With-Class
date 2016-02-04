@@ -72,9 +72,6 @@ Class DB_Connection {
         }else return false;
     }
 
-
-
-
     public function returnTableNameOptions()
     {
         $tableList="";
