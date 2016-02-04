@@ -32,7 +32,6 @@ Class DB_Connection {
         mysqli_close($this->attempt);
     }
 
-
     public function AttemptConnection(){
         $this->attempt = mysqli_connect($this->address,$this->username,$this->password,$this->database);
 
@@ -48,7 +47,6 @@ Class DB_Connection {
     public function GetLastErrorMessage(){
         return $this->lastErrorMessage;
     }
-
 
     public function ReturnCustomQueryResults($query){
         $this->result=mysqli_query($this->attempt, $query);

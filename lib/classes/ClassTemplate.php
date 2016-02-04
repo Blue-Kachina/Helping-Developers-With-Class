@@ -46,7 +46,9 @@ require_once('Table.php');
 
 Class {$this->table} EXTENDS Table  {
 {$this->GetDeclaration_Members()}
+{$this->GetDeclaration_RecordAsArray()}
 {$this->GetDeclaration_Load()}
+{$this->GetDeclaration_Save()}
 }
 CLASS_DECLARATION;
     }
@@ -56,23 +58,23 @@ CLASS_DECLARATION;
 
         //Template the member declaration column headers
         $output = PHP_EOL;
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('//            ' . 'Field', $widthInTabStops);
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Type', $widthInTabStops);
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Null', $widthInTabStops);
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Key', $widthInTabStops);
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Default', $widthInTabStops);
-        $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('Extra', $widthInTabStops);
+        $output .= $this->ColumnifyString('//            ' . 'Field', $widthInTabStops);
+        $output .= $this->ColumnifyString('Type', $widthInTabStops);
+        $output .= $this->ColumnifyString('Null', $widthInTabStops);
+        $output .= $this->ColumnifyString('Key', $widthInTabStops);
+        $output .= $this->ColumnifyString('Default', $widthInTabStops);
+        $output .= $this->ColumnifyString('Extra', $widthInTabStops);
         $output .= PHP_EOL;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
         foreach($this->columns as $index => $column) {
-            $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs('    public $' . $column["Field"], $widthInTabStops);
-            $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($column['Type'], $widthInTabStops);
-            $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($column['Null'], $widthInTabStops);
-            $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($column['Key'], $widthInTabStops);
-            $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($column['Default'], $widthInTabStops);
-            $output .= $this->Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($column['Extra'], $widthInTabStops);
+            $output .= $this->ColumnifyString('    public $' . $column["Field"], $widthInTabStops);
+            $output .= $this->ColumnifyString($column['Type'], $widthInTabStops);
+            $output .= $this->ColumnifyString($column['Null'], $widthInTabStops);
+            $output .= $this->ColumnifyString($column['Key'], $widthInTabStops);
+            $output .= $this->ColumnifyString($column['Default'], $widthInTabStops);
+            $output .= $this->ColumnifyString($column['Extra'], $widthInTabStops);
             $output .= PHP_EOL;
         }
         return $output;
@@ -84,22 +86,62 @@ CLASS_DECLARATION;
             //the following variable will only work properly on tables that have a single, solitary primary key
             $fieldName = $this->columns[$this->keyColumnIndexes[0]]['Field'];
 
-            $output = '    public function load($param_' . $fieldName . ') {' . PHP_EOL;
-            $output .= '        $db = get_db_connection();' . PHP_EOL;
-            $output .= '        $sql = \'SELECT * FROM [' . $this->table . '] WHERE [' . $fieldName . '] = ?\';' . PHP_EOL;
-            $output .= '        $rs = $db->query($sql, null, null, array($param_' . $fieldName . '));' . PHP_EOL;
-            $output .= '' . PHP_EOL;
-            $output .= '        if($rs && $rs->rowCount() > 0) {' . PHP_EOL;
-            $output .= '            $row = $rs->fetch(CoreDB::FETCH_ASSOC);' . PHP_EOL;
-            $output .= '            $this->loadFromArray($row);' . PHP_EOL;
-            $output .= '        }' . PHP_EOL;
-            $output .= '    }';
+            $output =   '    public function load($param_' . $fieldName . ') {' . PHP_EOL .
+                        '        $db = get_db_connection();' . PHP_EOL .
+                        '        $sql = \'SELECT * FROM [' . $this->table . '] WHERE [' . $fieldName . '] = ?\';' . PHP_EOL .
+                        '        $rs = $db->query($sql, null, null, array($param_' . $fieldName . '));' . PHP_EOL .
+                        '' . PHP_EOL .
+                        '        if($rs && $rs->rowCount() > 0) {' . PHP_EOL .
+                        '            $row = $rs->fetch(CoreDB::FETCH_ASSOC);' . PHP_EOL .
+                        '            $this->loadFromArray($row);' . PHP_EOL .
+                        '        }' . PHP_EOL .
+                        '    }';
         }
         return $output;
     }
 
-    private static function Make_String_N_Tab_Stops_Wide_By_PostFixing_Tabs($myString, $nTabStops){
-        $numRepetitionsGuess =$nTabStops - (floor(strlen($myString)/4)) ;
+    public function GetDeclaration_Save(){
+        $template =
+            '    public function save() {' .PHP_EOL .
+            '       $db = get_db_connection()' . PHP_EOL .
+            '       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
+            '           $sql = \'INSERT INTO [' . $this->table . ']' . PHP_EOL .
+            '               (' . PHP_EOL;
+
+        $countFields = count($this->columns);
+        foreach($this->columns as $fieldNum => $field){
+
+            $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
+            $thisField = '[' . $field['Field'] . ']' .$comma ;
+            $template .= '					' . $this->ColumnifyString($thisField,10) . '//' . substr ( '000' . ($fieldNum + 1) , -3 ) .PHP_EOL;
+        }
+        $template .=
+            '               )' . PHP_EOL ;
+        return $template;
+    }
+
+    public function GetDeclaration_RecordAsArray(){
+        $template =
+            '    private function GetThisRecordAsAssocArray(){' . PHP_EOL .
+            '        $record = array(' . PHP_EOL ;
+        $countFields = count($this->columns);
+        foreach($this->columns as $fieldNum => $field){
+            $_this='$this';
+            $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
+            $thisField = "'{$field['Field']}'=>"  ;
+            $thisValue = '$this->'."{$field['Field']}$comma";
+            $template .= '			' . $this->ColumnifyString($thisField,10) . $thisValue .PHP_EOL;
+        }
+        $template .=
+            '        )' . PHP_EOL .
+            '        return $record;' . PHP_EOL .
+            '    }';
+        return $template;
+    }
+
+
+    private static function ColumnifyString($myString, $columnWidthInTabStops){
+        $numRepetitionsGuess =$columnWidthInTabStops - (floor(strlen($myString)/4)) ;
         $numRepetitions= $numRepetitionsGuess >0 ? $numRepetitionsGuess : 0 ;
         $myTrailingTabSpace = str_repeat("\t", $numRepetitions );
         return $myString . $myTrailingTabSpace;

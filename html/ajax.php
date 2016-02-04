@@ -21,6 +21,7 @@ if (
             "message" => "Insufficient Parameters Passed"
         )
     );
+    exit();
 }
 
 //create a new database connection
