@@ -77,6 +77,10 @@ CLASS_DECLARATION;
             $output .= $this->ColumnifyString($column['Extra'], $widthInTabStops);
             $output .= PHP_EOL;
         }
+
+        $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
+        $output .= '//If you create any properties that aren\'t associated with a field from this table, please define them underneath this line'. PHP_EOL;
+        $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
         return $output;
     }
 
@@ -101,30 +105,30 @@ CLASS_DECLARATION;
     }
 
     public function GetDeclaration_Save(){
+        $_sql='$sql';
+        $_currentRecord='$currentRecord';
+
         $template =
-            '    public function save() {' .PHP_EOL .
-            '       $db = get_db_connection()' . PHP_EOL .
-            '       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
-            '           $sql = \'INSERT INTO [' . $this->table . ']' . PHP_EOL .
-            '               (' . PHP_EOL;
+'    public function save() {' .PHP_EOL .
+'       $db = get_db_connection()' . PHP_EOL .
+'       $currentRecord = GetThisObjectAsAssocArray(true);' . PHP_EOL .
+'       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
+'           $sql = \'INSERT INTO [' . $this->table . ']\'.' . PHP_EOL . <<<COLUMN_IMPLOSION
+            " ([".implode("], [", array_keys($_currentRecord))."])";
+            " VALUES ('".implode("', '", $_currentRecord)."') ";
+COLUMN_IMPLOSION;
 
-        $countFields = count($this->columns);
-        foreach($this->columns as $fieldNum => $field){
-
-            $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
-            $thisField = '[' . $field['Field'] . ']' .$comma ;
-            $template .= '					' . $this->ColumnifyString($thisField,10) . '//' . substr ( '000' . ($fieldNum + 1) , -3 ) .PHP_EOL;
-        }
-        $template .=
-            '               )' . PHP_EOL ;
+        $template .= PHP_EOL .
+            '		}' . PHP_EOL ;
         return $template;
     }
 
     public function GetDeclaration_RecordAsArray(){
         $template =
-            '    private function GetThisRecordAsAssocArray(){' . PHP_EOL .
+            '    private function GetThisObjectAsAssocArray($boolPopulatedOnly){' . PHP_EOL .
             '        $record = array(' . PHP_EOL ;
         $countFields = count($this->columns);
+        //TODo:Discuss with the others the feasibility of using get_object_vars here instead of looping through them all, and individually setting them
         foreach($this->columns as $fieldNum => $field){
             $_this='$this';
             $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
@@ -132,9 +136,12 @@ CLASS_DECLARATION;
             $thisValue = '$this->'."{$field['Field']}$comma";
             $template .= '			' . $this->ColumnifyString($thisField,10) . $thisValue .PHP_EOL;
         }
+        $template .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'.PHP_EOL;
+        $template .= '//If you create any properties that aren\'t associated with a field from this table, please define them underneath this line;'.PHP_EOL;
+        $template .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'.PHP_EOL;
         $template .=
             '        )' . PHP_EOL .
-            '        return $record;' . PHP_EOL .
+            '        return $boolPopulatedOnly ? $record : array_filer ( $record , , ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
             '    }';
         return $template;
     }
