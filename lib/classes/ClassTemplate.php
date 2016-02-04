@@ -68,9 +68,11 @@ CLASS_DECLARATION;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
+        $countFields = count($this->columns);
         foreach($this->columns as $index => $column) {
-            $output .= $this->ColumnifyString('    public $' . $column["Field"], $widthInTabStops);
-            $output .= $this->ColumnifyString($column['Type'], $widthInTabStops);
+            $comma = $index < $countFields - 1 ? ',' : '' ;
+            $output .= $this->ColumnifyString('    public $' . $column["Field"] . $comma , $widthInTabStops);
+            $output .= $this->ColumnifyString('//' . $column['Type'], $widthInTabStops);
             $output .= $this->ColumnifyString($column['Null'], $widthInTabStops);
             $output .= $this->ColumnifyString($column['Key'], $widthInTabStops);
             $output .= $this->ColumnifyString($column['Default'], $widthInTabStops);
