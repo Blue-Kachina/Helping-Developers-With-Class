@@ -120,17 +120,27 @@ CLASS_DECLARATION;
             " VALUES ('".implode("', '", $_currentRecord)."') ";
 COLUMN_IMPLOSION;
 
-        $template .= PHP_EOL .
-            '		}' . PHP_EOL ;
+        $tableName = $this->table ;
+        $pkName = $this->columns[$this->keyColumnIndexes[0]]['Field'] ;
+
+        $template.= PHP_EOL .
+            '			$rs = $db->query($sql, null, null, $fields);' . PHP_EOL .
+            '			if ($rs) {'  . PHP_EOL .
+            '				$this->' . $pkName . ' = $db->insertID();'  . PHP_EOL .
+            '				get_msg_system()->addMessage(\'' .  $tableName . '\' . $this->' . $pkName . '. \' Saved Successfully.\', Msg::GOOD);'  . PHP_EOL .
+            '				return true;' . PHP_EOL .
+            '			} else {' .  PHP_EOL .
+            '				get_msg_system()->addMessage(\'' . $tableName . '\' . $this->' . $pkName . ' . \' Save Failed. \' . $db->errorMsg(), Msg::ERROR);' . PHP_EOL .
+            '				return false;'  . PHP_EOL .
+            '			}' . PHP_EOL ;
         return $template;
     }
 
     public function GetDeclaration_RecordAsArray(){
         $template =
-            '    private function GetThisObjectAsAssocArray($boolPopulatedOnly){' . PHP_EOL .
+            '    private function GetThisObjectAsAssocArray($boolPopulatedOnly=false){' . PHP_EOL .
             '        $record = array(' . PHP_EOL ;
         $countFields = count($this->columns);
-        //TODo:Discuss with the others the feasibility of using get_object_vars here instead of looping through them all, and individually setting them
         foreach($this->columns as $fieldNum => $field){
             $_this='$this';
             $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
