@@ -68,10 +68,8 @@ CLASS_DECLARATION;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
-        $countFields = count($this->columns);
         foreach($this->columns as $index => $column) {
-            $comma = $index < $countFields - 1 ? ',' : '' ;
-            $output .= $this->ColumnifyString('    public $' . $column["Field"] . $comma , $widthInTabStops);
+            $output .= $this->ColumnifyString('    public $' . $column["Field"] . ';' , $widthInTabStops);
             $output .= $this->ColumnifyString('//' . $column['Type'], $widthInTabStops);
             $output .= $this->ColumnifyString($column['Null'], $widthInTabStops);
             $output .= $this->ColumnifyString($column['Key'], $widthInTabStops);
@@ -152,7 +150,7 @@ COLUMN_IMPLOSION;
         $template .= '//If you create any properties that aren\'t associated with a field from this table, please define them underneath this line;'.PHP_EOL;
         $template .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'.PHP_EOL;
         $template .=
-            '        )' . PHP_EOL .
+            '        );' . PHP_EOL .
             '        return $boolPopulatedOnly ? $record : array_filer ( $record , , ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
             '    }';
         return $template;
