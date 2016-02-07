@@ -68,6 +68,7 @@ CLASS_DECLARATION;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
+        //Member definitions (and metadata added into inline comments)
         foreach($this->columns as $index => $column) {
             $output .= $this->ColumnifyString('    public $' . $column["Field"] . ';' , $widthInTabStops);
             $output .= $this->ColumnifyString('//' . $column['Type'], $widthInTabStops);
@@ -78,6 +79,7 @@ CLASS_DECLARATION;
             $output .= PHP_EOL;
         }
 
+        //A message to alert developers who might use this class.  Any non-field related properties that they might add to this class should be added the following comment.  Doing so will allow for easy updates to this class using this utility at a later time
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
         $output .= '//If you create any properties that aren\'t associated with a field from this table, please define them underneath this line'. PHP_EOL;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
@@ -105,7 +107,6 @@ CLASS_DECLARATION;
     }
 
     public function GetDeclaration_Save(){
-        $_sql='$sql';
         $_currentRecord='$currentRecord';
 
         $template =
@@ -140,7 +141,6 @@ COLUMN_IMPLOSION;
             '        $record = array(' . PHP_EOL ;
         $countFields = count($this->columns);
         foreach($this->columns as $fieldNum => $field){
-            $_this='$this';
             $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
             $thisField = "'{$field['Field']}'=>"  ;
             $thisValue = '$this->'."{$field['Field']}$comma";
