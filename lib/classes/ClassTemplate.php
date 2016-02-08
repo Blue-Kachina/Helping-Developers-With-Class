@@ -101,7 +101,7 @@ CLASS_DECLARATION;
                         '            $row = $rs->fetch(CoreDB::FETCH_ASSOC);' . PHP_EOL .
                         '            $this->loadFromArray($row);' . PHP_EOL .
                         '        }' . PHP_EOL .
-                        '    }';
+                        '    }' .PHP_EOL;
         }
         return $output;
     }
@@ -111,19 +111,19 @@ CLASS_DECLARATION;
 
         $template =
 '    public function save() {' .PHP_EOL .
-'       $db = get_db_connection()' . PHP_EOL .
-'       $currentRecord = GetThisObjectAsAssocArray(true);' . PHP_EOL .
+'       $db = get_db_connection();' . PHP_EOL .
+'       $currentRecord = $this->GetThisObjectAsAssocArray(true);' . PHP_EOL .
 '       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
 '           $sql = \'INSERT INTO [' . $this->table . ']\'.' . PHP_EOL . <<<COLUMN_IMPLOSION
-            " ([".implode("], [", array_keys($_currentRecord))."])";
-            " VALUES ('".implode("', '", $_currentRecord)."') ";
+            ' (['.implode('], [', array_keys($_currentRecord)).'])' .
+            ' VALUES ('.implode(', ', $_currentRecord).') ';
 COLUMN_IMPLOSION;
 
         $tableName = $this->table ;
         $pkName = $this->columns[$this->keyColumnIndexes[0]]['Field'] ;
 
         $template.= PHP_EOL .
-            '			$rs = $db->query($sql, null, null, $fields);' . PHP_EOL .
+            '			$rs = $db->query($sql, null, null, array_keys($currentRecord));' . PHP_EOL .
             '			if ($rs) {'  . PHP_EOL .
             '				$this->' . $pkName . ' = $db->insertID();'  . PHP_EOL .
             '				get_msg_system()->addMessage(\'' .  $tableName . '\' . $this->' . $pkName . '. \' Saved Successfully.\', Msg::GOOD);'  . PHP_EOL .
@@ -131,7 +131,25 @@ COLUMN_IMPLOSION;
             '			} else {' .  PHP_EOL .
             '				get_msg_system()->addMessage(\'' . $tableName . '\' . $this->' . $pkName . ' . \' Save Failed. \' . $db->errorMsg(), Msg::ERROR);' . PHP_EOL .
             '				return false;'  . PHP_EOL .
-            '			}' . PHP_EOL ;
+            '			}' . PHP_EOL .
+            '        }else{' .PHP_EOL .
+            '            $sql = \'UPDATE [' . $this->table .  '] SET \' .' . PHP_EOL .<<<COLUMN_IMPLOSION
+            '['.implode('], [', array_keys($_currentRecord)) . '] = ?' .
+COLUMN_IMPLOSION;
+                 $template .= PHP_EOL . '\'   WHERE [' . $pkName . '] = ?\'; ' .PHP_EOL .
+                '        $rs = $db->query($sql, null, null, $currentRecord);' . PHP_EOL .
+                '        if ($rs) {' . PHP_EOL .
+                 '            $this->' . $pkName . ' =  $db->insertID();' . PHP_EOL .
+                '            get_msg_system()->addMessage(\'' . $tableName . ' \' . $this->' .  $pkName .  ' . \' Updated Successfully.\', Msg::GOOD); ' . PHP_EOL .
+                    '            return true;' . PHP_EOL .
+                '        } else {' . PHP_EOL .
+                    '            get_msg_system()->addMessage(\'' . $tableName .  ' \' . $this->' . $pkName  .  ' . \' Update Failed. \' . $db->errorMsg(), Msg::ERROR);' . PHP_EOL .
+                    '            return false;' . PHP_EOL .
+                '        }' . PHP_EOL .
+            '    }' . PHP_EOL .
+    '}' . PHP_EOL ;
+
+
         return $template;
     }
 
@@ -151,8 +169,8 @@ COLUMN_IMPLOSION;
         $template .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'.PHP_EOL;
         $template .=
             '        );' . PHP_EOL .
-            '        return $boolPopulatedOnly ? $record : array_filer ( $record , , ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
-            '    }';
+            '        return $boolPopulatedOnly ? $record : array_filer ( $record ,\'\', ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
+            '    }' .PHP_EOL;
         return $template;
     }
 

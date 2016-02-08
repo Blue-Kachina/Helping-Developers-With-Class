@@ -16,7 +16,6 @@ Class DB_Connection {
 
     private $lastErrorMessage;
     private $attempt;
-    private $mysqli;
     private $result;
 
     function __construct($serverType,$serverAddress,$serverUsername,$serverPassword,$serverDatabase){
@@ -56,7 +55,6 @@ Class DB_Connection {
 
     public function ReturnColumnData()
     {
-        $columnData = array();
 
         $this->AttemptConnection();
         if (!$this->attempt)
@@ -84,13 +82,9 @@ Class DB_Connection {
         */
 
         $res = mysqli_query($this->attempt, $query);
-        //printf("Error: %s\n", mysqli_error($res));
 
         while ($row = mysqli_fetch_array($res)) {
-            $tableList .=
-<<<TABLELIST
-<option value ="$row[0]">$row[0]</option>
-TABLELIST;
+            $tableList .= "<option value =\"$row[0]\">$row[0]</option>";
         }
         return $tableList;
     }
