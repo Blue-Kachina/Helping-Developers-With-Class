@@ -58,7 +58,7 @@ CLASS_DECLARATION;
 
         //Template the member declaration column headers
         $output = PHP_EOL;
-        $output .= $this->ColumnifyString('//            ' . 'Field', $widthInTabStops);
+        $output .= $this->ColumnifyString('//          ' . 'Field', $widthInTabStops);
         $output .= $this->ColumnifyString('Type', $widthInTabStops);
         $output .= $this->ColumnifyString('Null', $widthInTabStops);
         $output .= $this->ColumnifyString('Key', $widthInTabStops);
@@ -112,7 +112,7 @@ CLASS_DECLARATION;
         $template =
 '    public function save() {' .PHP_EOL .
 '       $db = get_db_connection();' . PHP_EOL .
-'       $currentRecord = $this->GetThisObjectAsAssocArray(true);' . PHP_EOL .
+'       $currentRecord = $this->GetThisRecordAsAssocArray(true);' . PHP_EOL .
 '       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
 '           $sql = \'INSERT INTO [' . $this->table . ']\'.' . PHP_EOL . <<<COLUMN_IMPLOSION
             ' (['.implode('], [', array_keys($_currentRecord)).'])' .
@@ -155,7 +155,7 @@ COLUMN_IMPLOSION;
 
     public function GetDeclaration_RecordAsArray(){
         $template =
-            '    private function GetThisObjectAsAssocArray($boolPopulatedOnly=false){' . PHP_EOL .
+            '    private function GetThisRecordAsAssocArray($boolPopulatedOnly=false){' . PHP_EOL .
             '        $record = array(' . PHP_EOL ;
         $countFields = count($this->columns);
         foreach($this->columns as $fieldNum => $field){
@@ -164,13 +164,37 @@ COLUMN_IMPLOSION;
             $thisValue = '$this->'."{$field['Field']}$comma";
             $template .= '			' . $this->ColumnifyString($thisField,10) . $thisValue .PHP_EOL;
         }
-        $template .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'.PHP_EOL;
-        $template .= '//If you create any properties that aren\'t associated with a field from this table, please define them underneath this line;'.PHP_EOL;
-        $template .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'.PHP_EOL;
         $template .=
             '        );' . PHP_EOL .
-            '        return $boolPopulatedOnly ? $record : array_filer ( $record ,\'\', ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
+            '        return $boolPopulatedOnly ? $record : array_filter ( $record ,\'\', ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
             '    }' .PHP_EOL;
+
+
+
+
+        $widthInTabStops = 10;
+        $template .=
+            '    private function GetTableMetaAsAssocArray(){' . PHP_EOL .
+            '        $record = array(' .PHP_EOL ;
+        $countFields = count($this->columns);
+        foreach($this->columns as $fieldNum => $field){
+            $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
+            $thisField = $this->ColumnifyString("'{$field['Field']}'=>" , $widthInTabStops)  ;
+            $thisValue = $this->ColumnifyString('array(' , 3);
+            $thisValue .= $this->ColumnifyString('"Type"=>\''. addslashes("{$field['Type']}") . "'," , $widthInTabStops + 5);
+            $thisValue .= $this->ColumnifyString('"Null"=>\''."{$field['Null']}'," , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"Key"=>\''."{$field['Key']}'," , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>1,' , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"BoolEscapeSQLFieldName"=>1)' . $comma , $widthInTabStops)  . PHP_EOL;
+            $template .= '			' . $thisField . $thisValue ;
+        }
+        $template .=
+            '        );' . PHP_EOL .
+            '        return $record;' . PHP_EOL .
+            '    }' .PHP_EOL;
+
+
+
         return $template;
     }
 
