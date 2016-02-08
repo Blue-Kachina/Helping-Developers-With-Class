@@ -11,6 +11,11 @@
 
 //SELECT Distinct TABLE_NAME FROM information_schema.TABLES
 
+//ToDo: Create in 'Table.php' => constants to represent the filterTypeNums
+//ToDo: Create in 'Table.php' => constants to represent table/field escaping character
+//ToDo: Create in 'Table.php or generated file' => Function that will return a list of non-null fieldNames
+
+
 Class ClassTemplate {
     private $table;
     private $columns = array();
