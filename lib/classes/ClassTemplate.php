@@ -65,10 +65,10 @@ CLASS_DECLARATION;
         $output = PHP_EOL;
         $output .= $this->ColumnifyString('//          ' . 'Field', $widthInTabStops);
         $output .= $this->ColumnifyString('Type', $widthInTabStops);
-        $output .= $this->ColumnifyString('Null', $widthInTabStops);
-        $output .= $this->ColumnifyString('Key', $widthInTabStops);
-        $output .= $this->ColumnifyString('Default', $widthInTabStops);
-        $output .= $this->ColumnifyString('Extra', $widthInTabStops);
+        $output .= $this->ColumnifyString('Null', 4);
+        $output .= $this->ColumnifyString('Key', 4);
+        $output .= $this->ColumnifyString('Default', 4);
+        $output .= $this->ColumnifyString('Extra', 4);
         $output .= PHP_EOL;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
@@ -77,10 +77,10 @@ CLASS_DECLARATION;
         foreach($this->columns as $index => $column) {
             $output .= $this->ColumnifyString('    public $' . $column["Field"] . ';' , $widthInTabStops);
             $output .= $this->ColumnifyString('//' . $column['Type'], $widthInTabStops);
-            $output .= $this->ColumnifyString($column['Null'], $widthInTabStops);
-            $output .= $this->ColumnifyString($column['Key'], $widthInTabStops);
-            $output .= $this->ColumnifyString($column['Default'], $widthInTabStops);
-            $output .= $this->ColumnifyString($column['Extra'], $widthInTabStops);
+            $output .= $this->ColumnifyString($column['Null'], 4);
+            $output .= $this->ColumnifyString($column['Key'], 4);
+            $output .= $this->ColumnifyString($column['Default'], 4);
+            $output .= $this->ColumnifyString($column['Extra'], 4);
             $output .= PHP_EOL;
         }
 
@@ -187,10 +187,10 @@ COLUMN_IMPLOSION;
             $thisField = $this->ColumnifyString("'{$field['Field']}'=>" , $widthInTabStops)  ;
             $thisValue = $this->ColumnifyString('array(' , 3);
             $thisValue .= $this->ColumnifyString('"Type"=>\''. addslashes("{$field['Type']}") . "'," , $widthInTabStops + 5);
-            $thisValue .= $this->ColumnifyString('"Null"=>\''."{$field['Null']}'," , $widthInTabStops);
-            $thisValue .= $this->ColumnifyString('"Key"=>\''."{$field['Key']}'," , $widthInTabStops);
-            $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>1,' , $widthInTabStops);
-            $thisValue .= $this->ColumnifyString('"BoolEscapeSQLFieldName"=>1)' . $comma , $widthInTabStops)  . PHP_EOL;
+            $thisValue .= $this->ColumnifyString('"Null"=>\''."{$field['Null']}'," , 4);
+            $thisValue .= $this->ColumnifyString('"Key"=>\''."{$field['Key']}'," , 4);
+            $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>1,' , 6);
+            $thisValue .= $this->ColumnifyString('"BoolEscapeSQLFieldName"=>1)' . $comma , 4)  . PHP_EOL;
             $template .= '			' . $thisField . $thisValue ;
         }
         $template .=
