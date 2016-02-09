@@ -11,8 +11,6 @@
 
 //SELECT Distinct TABLE_NAME FROM information_schema.TABLES
 
-//ToDo: Create in 'Table.php' => constants to represent the filterTypeNums
-//ToDo: Create in 'Table.php' => constants to represent table/field escaping character
 //ToDo: Create in 'Table.php or generated file' => Function that will return a list of non-null fieldNames
 
 
@@ -50,10 +48,22 @@ require_once('Table.php');
 
 
 Class {$this->table} EXTENDS Table  {
+
+    const FILTER_TYPE_NONE = 0;
+    const FILTER_TYPE_BOOL = 1;
+    const FILTER_TYPE_INT = 2;
+    const FILTER_TYPE_FLOAT = 3;
+    const FILTER_TYPE_STRING = 4;
+
+    const CHAR_ESCAPE_FIELD_VALUE = "'" ;
+    const CHAR_ESCAPE_FIELD_NAME = "`";
+
 {$this->GetDeclaration_Members()}
-{$this->GetDeclaration_RecordAsArray()}
+{$this->GetDeclaration_TableMetadata()}
 {$this->GetDeclaration_Load()}
 {$this->GetDeclaration_Save()}
+{$this->GetDeclaration_AssocArray()}
+{$this->GetDeclaration_FilterAndEscape()}
 }
 CLASS_DECLARATION;
     }
@@ -117,7 +127,7 @@ CLASS_DECLARATION;
         $template =
 '    public function save() {' .PHP_EOL .
 '       $db = get_db_connection();' . PHP_EOL .
-'       $currentRecord = $this->GetThisRecordAsAssocArray(true);' . PHP_EOL .
+'       $currentRecord = $this->GetAssocArrayFromListOfFields();' . PHP_EOL .
 '       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
 '           $sql = \'INSERT INTO [' . $this->table . ']\'.' . PHP_EOL . <<<COLUMN_IMPLOSION
             ' (['.implode('], [', array_keys($_currentRecord)).'])' .
@@ -158,27 +168,9 @@ COLUMN_IMPLOSION;
         return $template;
     }
 
-    public function GetDeclaration_RecordAsArray(){
-        $template =
-            '    private function GetThisRecordAsAssocArray($boolPopulatedOnly=false){' . PHP_EOL .
-            '        $record = array(' . PHP_EOL ;
-        $countFields = count($this->columns);
-        foreach($this->columns as $fieldNum => $field){
-            $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
-            $thisField = "'{$field['Field']}'=>"  ;
-            $thisValue = '$this->'."{$field['Field']}$comma";
-            $template .= '			' . $this->ColumnifyString($thisField,10) . $thisValue .PHP_EOL;
-        }
-        $template .=
-            '        );' . PHP_EOL .
-            '        return $boolPopulatedOnly ? $record : array_filter ( $record ,\'\', ARRAY_FILTER_USE_BOTH );' . PHP_EOL .
-            '    }' .PHP_EOL;
-
-
-
-
+    public function GetDeclaration_TableMetadata(){
         $widthInTabStops = 10;
-        $template .=
+        $template =
             '    private function GetTableMetaAsAssocArray(){' . PHP_EOL .
             '        $record = array(' .PHP_EOL ;
         $countFields = count($this->columns);
@@ -198,9 +190,69 @@ COLUMN_IMPLOSION;
             '        return $record;' . PHP_EOL .
             '    }' .PHP_EOL;
 
-
-
         return $template;
+    }
+
+    public function GetDeclaration_AssocArray(){
+        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, 'Field')) . '\')';
+        $template =
+        "public function GetAssocArrayFromListOfFields(".'$listOfFields'."=$fieldArray){" . PHP_EOL .
+            '$result = array();' . PHP_EOL .
+            'foreach($listOfFields as $fieldName){' . PHP_EOL .
+                'if(property_exists($this,$fieldName)){' . PHP_EOL .
+                    '$result[$fieldName]=$this->FilterAndEscapeField($fieldName);' . PHP_EOL .
+                '}' . PHP_EOL .
+            '}' . PHP_EOL .
+            'return $result;' . PHP_EOL .
+        '}' . PHP_EOL ;
+        return $template;
+    }
+
+    public function GetDeclaration_FilterAndEscape(){
+        return <<<'FILTER_FUNCTION'
+    public function FilterAndEscapeField($fieldName){
+        if(property_exists($this,$fieldName)){
+            $tableMeta = $this->GetTableMetaAsAssocArray();
+
+            $filterType = $tableMeta[$fieldName]['FilterTypeNum'];
+            $boolAllowsNull = $tableMeta[$fieldName]['Null'] == 'YES' ? true : false ;
+            $boolRequiresEscape = $tableMeta[$fieldName]['BoolEscapeSQLFieldName'];
+
+            $escapeChar = $boolRequiresEscape ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
+
+            $fieldValue = $this->$fieldName;
+            $returnValue = '';
+
+            switch($filterType){
+                case $this::FILTER_TYPE_STRING:
+                    $returnValue = filter_var($fieldValue,FILTER_SANITIZE_STRING);
+                    break;
+
+                case $this::FILTER_TYPE_INT:
+                    $returnValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_INT);
+                    break;
+
+                case $this::FILTER_TYPE_FLOAT:
+                    $returnValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
+                    break;
+
+                case $this::FILTER_TYPE_BOOL:
+                    $returnValue =  boolval($fieldValue) ? 1 : 0 ;
+                    break;
+            }
+
+            $returnValue = $escapeChar.$returnValue.$escapeChar ;
+            if ( ($returnValue=='' || $returnValue == $escapeChar.$escapeChar) && $boolAllowsNull) {
+                return $escapeChar . NULL . $escapeChar;
+            }
+            elseif ( ($returnValue=='' || $returnValue == $escapeChar.$escapeChar) && $boolAllowsNull){
+                return false;
+            }
+            else return $returnValue;
+        }
+    }
+FILTER_FUNCTION;
+
     }
 
 

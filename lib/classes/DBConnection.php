@@ -15,8 +15,8 @@ Class DB_Connection {
     public $table;
 
     private $lastErrorMessage;
-    private $attempt;
-    private $result;
+    public $connection;
+    public $result;
 
     function __construct($serverType,$serverAddress,$serverUsername,$serverPassword,$serverDatabase){
         $this->type=$serverType;
@@ -27,20 +27,20 @@ Class DB_Connection {
     }
 
     function __destruct(){
-        if(isset($this->attempt))
-        mysqli_close($this->attempt);
+        if(isset($this->connection))
+        mysqli_close($this->connection);
     }
 
     public function AttemptConnection(){
-        $this->attempt = mysqli_connect($this->address,$this->username,$this->password,$this->database);
+        $this->connection = mysqli_connect($this->address,$this->username,$this->password,$this->database);
 
-        if(!$this->attempt){
+        if(!$this->connection){
             $this->lastErrorMessage=
             "Error: Unable to connect to MySQL." . PHP_EOL .
             "Debugging errno: " . mysqli_connect_errno() . PHP_EOL .
             "Debugging error: " . mysqli_connect_error() . PHP_EOL;
         }
-        return $this->attempt;
+        return $this->connection;
     }
 
     public function GetLastErrorMessage(){
@@ -48,21 +48,31 @@ Class DB_Connection {
     }
 
     public function ReturnCustomQueryResults($query){
-        $this->result=mysqli_query($this->attempt, $query);
-        $this->lastErrorMessage=mysqli_error($this->attempt);
-        return $this->result;
+        $result = mysqli_query($this->connection, $query);
+        $this->result= $result;
+        if (!$this->result){
+            $this->lastErrorMessage=mysqli_error($this->connection);
+            return false;
+        }
+        else{
+            $leftWord = explode(' ',trim($query))[0];
+            if ( $leftWord == "SELECT" || $leftWord == "SHOW" || $leftWord == "DESCRIBE" || $leftWord == "EXPLAIN" ){
+                return mysqli_fetch_all($this->result, MYSQLI_ASSOC);
+            }
+            return true;
+        }
     }
 
     public function ReturnColumnData()
     {
 
         $this->AttemptConnection();
-        if (!$this->attempt)
+        if (!$this->connection)
             return false;
 
         $query = "SHOW COLUMNS IN " . filter_var($this->table, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-        if ($result = mysqli_query($this->attempt, $query)) {
+        if ($result = mysqli_query($this->connection, $query)) {
             return mysqli_fetch_all($result,MYSQLI_ASSOC);
 
         }else return false;
@@ -71,8 +81,8 @@ Class DB_Connection {
     public function returnTableNameOptions()
     {
         $tableList="";
-        $this->attempt = $this->AttemptConnection();
-        if (!$this->attempt)
+        $this->connection = $this->AttemptConnection();
+        if (!$this->connection)
             return false;
 
         $query = "SHOW TABLES";
@@ -81,7 +91,7 @@ Class DB_Connection {
             'FROM INFORMATION_SCHEMA.COLUMNS' . PHP_EOL ;
         */
 
-        $res = mysqli_query($this->attempt, $query);
+        $res = mysqli_query($this->connection, $query);
 
         while ($row = mysqli_fetch_array($res)) {
             $tableList .= "<option value =\"$row[0]\">$row[0]</option>";
