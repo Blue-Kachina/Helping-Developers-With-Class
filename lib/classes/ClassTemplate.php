@@ -196,11 +196,14 @@ COLUMN_IMPLOSION;
     public function GetDeclaration_AssocArray(){
         $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, 'Field')) . '\')';
         $template =
-        "public function GetAssocArrayFromListOfFields(".'$listOfFields'."=$fieldArray){" . PHP_EOL .
+        "public function GetAssocArrayFromListOfFields(".'$listOfFields'."=$fieldArray,\$excludeEmpties=false){" . PHP_EOL .
             '$result = array();' . PHP_EOL .
             'foreach($listOfFields as $fieldName){' . PHP_EOL .
                 'if(property_exists($this,$fieldName)){' . PHP_EOL .
-                    '$result[$fieldName]=$this->FilterAndEscapeField($fieldName);' . PHP_EOL .
+                '$filteredResult =  $this->FilterAndEscapeField($fieldName);' . PHP_EOL .
+        '$boolIsAnEmpty = !isset($filteredResult) || $filteredResult == \'\' || $filteredResult == $escapeChar.$escapeChar ;' . PHP_EOL .
+        'if (!$boolIsAnEmpty || !$excludeEmpties)' . PHP_EOL .
+            '$result[$fieldName]=$filteredResult;' . PHP_EOL .
                 '}' . PHP_EOL .
             '}' . PHP_EOL .
             'return $result;' . PHP_EOL .
