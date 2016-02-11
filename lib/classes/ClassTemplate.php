@@ -8,10 +8,6 @@
  * Purpose: To template our current TableClass Declarations
  */
 
-
-//SELECT Distinct TABLE_NAME FROM information_schema.TABLES
-
-//ToDo: Create in 'Table.php or generated file' => Function that will return a list of non-null fieldNames
 define('METADATA_FIELDNAME_FIELD', 'COLUMN_NAME');
 define('METADATA_FIELDNAME_TYPE', 'DATA_TYPE');
 define('METADATA_FIELDNAME_NULL', 'IS_NULLABLE');
@@ -68,7 +64,6 @@ Class {$this->table} EXTENDS Table  {
     const CHAR_ESCAPE_FIELD_NAME = "`";
 
 {$this->GetDeclaration_Members()}
-
 
 {$this->GetDeclaration_TableMetadata()}
 
@@ -215,7 +210,7 @@ COLUMN_IMPLOSION;
     foreach (\$listOfFields as \$fieldName) {
         if (property_exists(\$this, \$fieldName)) {
             \$filteredResult = \$this->FilterAndEscapeField(\$fieldName);
-            \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$escapeChar . \$escapeChar;
+            \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$this::CHAR_ESCAPE_FIELD_VALUE . \$this::CHAR_ESCAPE_FIELD_VALUE;
             if (!\$boolIsAnEmpty || !\$excludeEmpties)
                 \$result[\$fieldName] = \$filteredResult;
             }
