@@ -70,7 +70,12 @@ Class DB_Connection {
         if (!$this->connection)
             return false;
 
-        $query = "SHOW COLUMNS IN " . filter_var($this->table, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        //$query = "SHOW COLUMNS IN " . filter_var($this->table, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $query =
+            'SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA ' . PHP_EOL .
+            'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
+            'WHERE TABLE_SCHEMA = \'' . filter_var($this->database,FILTER_SANITIZE_STRING) . '\' AND ' .PHP_EOL .
+            'TABLE_NAME = \'' . filter_var($this->table,FILTER_SANITIZE_STRING) . '\'';
 
         if ($result = mysqli_query($this->connection, $query)) {
             return mysqli_fetch_all($result,MYSQLI_ASSOC);
@@ -88,8 +93,8 @@ Class DB_Connection {
         //$query = "SHOW TABLES";
         $query =
             'SELECT DISTINCT TABLE_NAME' . PHP_EOL .
-            'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
-            'WHERE TABLE_SCHEMA LIKE \'%' . $this->database . '\'';
+            'FROM INFORMATION_SCHEMA.TABLES ' . PHP_EOL .
+            'WHERE TABLE_SCHEMA = \'' . $this->database . '\'';
 
 
         $res = mysqli_query($this->connection, $query);

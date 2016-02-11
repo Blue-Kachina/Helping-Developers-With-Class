@@ -12,6 +12,15 @@
 //SELECT Distinct TABLE_NAME FROM information_schema.TABLES
 
 //ToDo: Create in 'Table.php or generated file' => Function that will return a list of non-null fieldNames
+define('METADATA_FIELDNAME_FIELD', 'COLUMN_NAME');
+define('METADATA_FIELDNAME_TYPE', 'DATA_TYPE');
+define('METADATA_FIELDNAME_NULL', 'IS_NULLABLE');
+define('METADATA_FIELDNAME_KEY', 'COLUMN_KEY');
+define('METADATA_FIELDNAME_DEFAULT', 'COLUMN_DEFAULT');
+define('METADATA_FIELDNAME_EXTRA', 'EXTRA');
+
+define('CHAR_ESCAPE_FIELD_NAME' , '`');
+define('CHAR_ESCAPE_FIELD_VALUE' , '\'');
 
 
 Class ClassTemplate {
@@ -32,7 +41,7 @@ Class ClassTemplate {
         $arraySize = count($this->columns);
 
         //Add the column to keyColumnIndexes when applicable
-        if (array_key_exists('Key',$column) && strtoupper($column['Key'])=='PRI'){
+        if (array_key_exists(METADATA_FIELDNAME_KEY,$column) && strtoupper($column[METADATA_FIELDNAME_KEY])=='PRI'){
             $this->keyColumnIndexes[]= ($arraySize - 1) ;
         }
     }
@@ -59,11 +68,18 @@ Class {$this->table} EXTENDS Table  {
     const CHAR_ESCAPE_FIELD_NAME = "`";
 
 {$this->GetDeclaration_Members()}
+
+
 {$this->GetDeclaration_TableMetadata()}
+
 {$this->GetDeclaration_Load()}
+
 {$this->GetDeclaration_Save()}
+
 {$this->GetDeclaration_AssocArray()}
+
 {$this->GetDeclaration_FilterAndEscape()}
+
 }
 CLASS_DECLARATION;
     }
@@ -73,24 +89,24 @@ CLASS_DECLARATION;
 
         //Template the member declaration column headers
         $output = PHP_EOL;
-        $output .= $this->ColumnifyString('//          ' . 'Field', $widthInTabStops);
-        $output .= $this->ColumnifyString('Type', $widthInTabStops);
-        $output .= $this->ColumnifyString('Null', 4);
-        $output .= $this->ColumnifyString('Key', 4);
-        $output .= $this->ColumnifyString('Default', 4);
-        $output .= $this->ColumnifyString('Extra', 4);
+        $output .= $this->ColumnifyString('//          ' . METADATA_FIELDNAME_FIELD, $widthInTabStops);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_TYPE, $widthInTabStops);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_NULL, 4);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_KEY, 4);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_DEFAULT, 4);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_EXTRA, 4);
         $output .= PHP_EOL;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
         //Member definitions (and metadata added into inline comments)
         foreach($this->columns as $index => $column) {
-            $output .= $this->ColumnifyString('    public $' . $column["Field"] . ';' , $widthInTabStops);
-            $output .= $this->ColumnifyString('//' . $column['Type'], $widthInTabStops);
-            $output .= $this->ColumnifyString($column['Null'], 4);
-            $output .= $this->ColumnifyString($column['Key'], 4);
-            $output .= $this->ColumnifyString($column['Default'], 4);
-            $output .= $this->ColumnifyString($column['Extra'], 4);
+            $output .= $this->ColumnifyString('    public $' . $column[METADATA_FIELDNAME_FIELD] . ';' , $widthInTabStops);
+            $output .= $this->ColumnifyString('//' . $column[METADATA_FIELDNAME_TYPE], $widthInTabStops);
+            $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_NULL], 4);
+            $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_KEY], 4);
+            $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_DEFAULT], 4);
+            $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_EXTRA], 4);
             $output .= PHP_EOL;
         }
 
@@ -102,70 +118,63 @@ CLASS_DECLARATION;
     }
 
     public function GetDeclaration_Load(){
-        $output = '';
-        if(!empty($this->keyColumnIndexes)) {
-            //the following variable will only work properly on tables that have a single, solitary primary key
-            $fieldName = $this->columns[$this->keyColumnIndexes[0]]['Field'];
+        $_escapeName = CHAR_ESCAPE_FIELD_NAME;
+        $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
+        $_tableName = $this->table;
 
-            $output =   '    public function load($param_' . $fieldName . ') {' . PHP_EOL .
-                        '        $db = get_db_connection();' . PHP_EOL .
-                        '        $sql = \'SELECT * FROM [' . $this->table . '] WHERE [' . $fieldName . '] = ?\';' . PHP_EOL .
-                        '        $rs = $db->query($sql, null, null, array($param_' . $fieldName . '));' . PHP_EOL .
-                        '' . PHP_EOL .
-                        '        if($rs && $rs->rowCount() > 0) {' . PHP_EOL .
-                        '            $row = $rs->fetch(CoreDB::FETCH_ASSOC);' . PHP_EOL .
-                        '            $this->loadFromArray($row);' . PHP_EOL .
-                        '        }' . PHP_EOL .
-                        '    }' .PHP_EOL;
+        $declaration=
+<<<LOAD_DECLARATION
+    public function load(\$param_$_fieldName) {
+        \$db = get_db_connection();
+        \$sql = 'SELECT * FROM $_escapeName$_tableName$_escapeName WHERE $_escapeName$_fieldName$_escapeName = ?';
+        \$rs = \$db->query(\$sql, null, null, array(\$param_$_fieldName));
+
+        if(\$rs && \$rs->rowCount() > 0) {
+            \$row = \$rs->fetch(CoreDB::FETCH_ASSOC);
+            \$this->loadFromArray(\$row);
         }
-        return $output;
+    }
+LOAD_DECLARATION;
+        return $declaration;
     }
 
     public function GetDeclaration_Save(){
-        $_currentRecord='$currentRecord';
-
-        $template =
-'    public function save() {' .PHP_EOL .
-'       $db = get_db_connection();' . PHP_EOL .
-'       $currentRecord = $this->GetAssocArrayFromListOfFields();' . PHP_EOL .
-'       if (empty($this->' . $this->columns[$this->keyColumnIndexes[0]]['Field'] .  ')) {' . PHP_EOL .
-'           $sql = \'INSERT INTO [' . $this->table . ']\'.' . PHP_EOL . <<<COLUMN_IMPLOSION
-            ' (['.implode('], [', array_keys($_currentRecord)).'])' .
-            ' VALUES ('.implode(', ', $_currentRecord).') ';
+        $_escapeName = CHAR_ESCAPE_FIELD_NAME;
+        $_tableName = $this->table;
+        return
+<<<COLUMN_IMPLOSION
+    public function save() {
+       \$db = get_db_connection();
+       \$currentRecord = \$this->GetAssocArrayFromListOfFields();
+       if (empty(\$this->Host)) {
+           \$sql = 'INSERT INTO $_escapeName$_tableName$_escapeName'.
+            ' ($_escapeName'.implode('$_escapeName, $_escapeName', array_keys(\$currentRecord)).'$_escapeName)' .
+            ' VALUES ('.implode(', ', \$currentRecord).') ';
+			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord));
+			if (\$rs) {
+				\$this->Host = \$db->insertID();
+				get_msg_system()->addMessage('user' . \$this->Host. ' Saved Successfully.', Msg::GOOD);
+				return true;
+			} else {
+				get_msg_system()->addMessage('user' . \$this->Host . ' Save Failed. ' . \$db->errorMsg(), Msg::ERROR);
+				return false;
+			}
+        }else{
+            \$sql = 'UPDATE $_escapeName$_tableName$_escapeName SET ' .
+            '$_escapeName'.implode('$_escapeName, $_escapeName', array_keys(\$currentRecord)) . '$_escapeName = ?' .
+'   WHERE [Host] = ?';
+        \$rs = \$db->query(\$sql, null, null, \$currentRecord);
+        if (\$rs) {
+            \$this->Host =  \$db->insertID();
+            get_msg_system()->addMessage('user ' . \$this->Host . ' Updated Successfully.', Msg::GOOD);
+            return true;
+        } else {
+            get_msg_system()->addMessage('user ' . \$this->Host . ' Update Failed. ' . \$db->errorMsg(), Msg::ERROR);
+            return false;
+        }
+    }
+}
 COLUMN_IMPLOSION;
-
-        $tableName = $this->table ;
-        $pkName = $this->columns[$this->keyColumnIndexes[0]]['Field'] ;
-
-        $template.= PHP_EOL .
-            '			$rs = $db->query($sql, null, null, array_keys($currentRecord));' . PHP_EOL .
-            '			if ($rs) {'  . PHP_EOL .
-            '				$this->' . $pkName . ' = $db->insertID();'  . PHP_EOL .
-            '				get_msg_system()->addMessage(\'' .  $tableName . '\' . $this->' . $pkName . '. \' Saved Successfully.\', Msg::GOOD);'  . PHP_EOL .
-            '				return true;' . PHP_EOL .
-            '			} else {' .  PHP_EOL .
-            '				get_msg_system()->addMessage(\'' . $tableName . '\' . $this->' . $pkName . ' . \' Save Failed. \' . $db->errorMsg(), Msg::ERROR);' . PHP_EOL .
-            '				return false;'  . PHP_EOL .
-            '			}' . PHP_EOL .
-            '        }else{' .PHP_EOL .
-            '            $sql = \'UPDATE [' . $this->table .  '] SET \' .' . PHP_EOL .<<<COLUMN_IMPLOSION
-            '['.implode('], [', array_keys($_currentRecord)) . '] = ?' .
-COLUMN_IMPLOSION;
-                 $template .= PHP_EOL . '\'   WHERE [' . $pkName . '] = ?\'; ' .PHP_EOL .
-                '        $rs = $db->query($sql, null, null, $currentRecord);' . PHP_EOL .
-                '        if ($rs) {' . PHP_EOL .
-                 '            $this->' . $pkName . ' =  $db->insertID();' . PHP_EOL .
-                '            get_msg_system()->addMessage(\'' . $tableName . ' \' . $this->' .  $pkName .  ' . \' Updated Successfully.\', Msg::GOOD); ' . PHP_EOL .
-                    '            return true;' . PHP_EOL .
-                '        } else {' . PHP_EOL .
-                    '            get_msg_system()->addMessage(\'' . $tableName .  ' \' . $this->' . $pkName  .  ' . \' Update Failed. \' . $db->errorMsg(), Msg::ERROR);' . PHP_EOL .
-                    '            return false;' . PHP_EOL .
-                '        }' . PHP_EOL .
-            '    }' . PHP_EOL .
-    '}' . PHP_EOL ;
-
-
-        return $template;
     }
 
     public function GetDeclaration_TableMetadata(){
@@ -176,11 +185,11 @@ COLUMN_IMPLOSION;
         $countFields = count($this->columns);
         foreach($this->columns as $fieldNum => $field){
             $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
-            $thisField = $this->ColumnifyString("'{$field['Field']}'=>" , $widthInTabStops)  ;
+            $thisField = $this->ColumnifyString("'{$field[METADATA_FIELDNAME_FIELD]}'=>" , $widthInTabStops)  ;
             $thisValue = $this->ColumnifyString('array(' , 3);
-            $thisValue .= $this->ColumnifyString('"Type"=>\''. addslashes("{$field['Type']}") . "'," , $widthInTabStops + 5);
-            $thisValue .= $this->ColumnifyString('"Null"=>\''."{$field['Null']}'," , 4);
-            $thisValue .= $this->ColumnifyString('"Key"=>\''."{$field['Key']}'," , 4);
+            $thisValue .= $this->ColumnifyString('"Type"=>\''. addslashes("{$field[METADATA_FIELDNAME_TYPE]}") . "'," , $widthInTabStops + 5);
+            $thisValue .= $this->ColumnifyString('"Null"=>\''."{$field[METADATA_FIELDNAME_NULL]}'," , 4);
+            $thisValue .= $this->ColumnifyString('"Key"=>\''."{$field[METADATA_FIELDNAME_KEY]}'," , 4);
             $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>1,' , 6);
             $thisValue .= $this->ColumnifyString('"BoolEscapeSQLFieldName"=>1)' . $comma , 4)  . PHP_EOL;
             $template .= '			' . $thisField . $thisValue ;
@@ -194,64 +203,70 @@ COLUMN_IMPLOSION;
     }
 
     public function GetDeclaration_AssocArray(){
-        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, 'Field')) . '\')';
-        $template =
-        "public function GetAssocArrayFromListOfFields(".'$listOfFields'."=$fieldArray,\$excludeEmpties=false){" . PHP_EOL .
-            '$result = array();' . PHP_EOL .
-            'foreach($listOfFields as $fieldName){' . PHP_EOL .
-                'if(property_exists($this,$fieldName)){' . PHP_EOL .
-                '$filteredResult =  $this->FilterAndEscapeField($fieldName);' . PHP_EOL .
-        '$boolIsAnEmpty = !isset($filteredResult) || $filteredResult == \'\' || $filteredResult == $escapeChar.$escapeChar ;' . PHP_EOL .
-        'if (!$boolIsAnEmpty || !$excludeEmpties)' . PHP_EOL .
-            '$result[$fieldName]=$filteredResult;' . PHP_EOL .
-                '}' . PHP_EOL .
-            '}' . PHP_EOL .
-            'return $result;' . PHP_EOL .
-        '}' . PHP_EOL ;
-        return $template;
+        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
+
+        return
+<<<ASSOC_ARRAY
+    public function GetAssocArrayFromListOfFields(\$listOfFields = "*", \$excludeEmpties = false)
+    {
+    if (\$listOfFields=='*')
+        \$listOfFields=$fieldArray;
+    \$result = array();
+    foreach (\$listOfFields as \$fieldName) {
+        if (property_exists(\$this, \$fieldName)) {
+            \$filteredResult = \$this->FilterAndEscapeField(\$fieldName);
+            \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$escapeChar . \$escapeChar;
+            if (!\$boolIsAnEmpty || !\$excludeEmpties)
+                \$result[\$fieldName] = \$filteredResult;
+            }
+        }
+        return \$result;
+    }
+ASSOC_ARRAY;
     }
 
     public function GetDeclaration_FilterAndEscape(){
-        return <<<'FILTER_FUNCTION'
-    public function FilterAndEscapeField($fieldName){
-        if(property_exists($this,$fieldName)){
-            $tableMeta = $this->GetTableMetaAsAssocArray();
+        $metaFieldName = METADATA_FIELDNAME_FIELD;
+        return <<<FILTER_FUNCTION
+    public function FilterAndEscapeField(\$fieldName){
+        if(property_exists(\$this,\$fieldName)){
+            \$tableMeta = \$this->GetTableMetaAsAssocArray();
 
-            $filterType = $tableMeta[$fieldName]['FilterTypeNum'];
-            $boolAllowsNull = $tableMeta[$fieldName]['Null'] == 'YES' ? true : false ;
-            $boolRequiresEscape = $tableMeta[$fieldName]['BoolEscapeSQLFieldName'];
+            \$filterType = \$tableMeta[\$fieldName]['FilterTypeNum'];
+            \$boolAllowsNull = \$tableMeta[\$fieldName][$metaFieldName] == 'YES' ? true : false ;
+            \$boolRequiresEscape = \$tableMeta[\$fieldName]['BoolEscapeSQLFieldName'];
 
-            $escapeChar = $boolRequiresEscape ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
+            \$escapeChar = \$boolRequiresEscape ? \$this::CHAR_ESCAPE_FIELD_VALUE : "";
 
-            $fieldValue = $this->$fieldName;
-            $returnValue = '';
+            \$fieldValue = \$this->\$fieldName;
+            \$returnValue = '';
 
-            switch($filterType){
-                case $this::FILTER_TYPE_STRING:
-                    $returnValue = filter_var($fieldValue,FILTER_SANITIZE_STRING);
+            switch(\$filterType){
+                case \$this::FILTER_TYPE_STRING:
+                    \$returnValue = filter_var(\$fieldValue,FILTER_SANITIZE_STRING);
                     break;
 
-                case $this::FILTER_TYPE_INT:
-                    $returnValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_INT);
+                case \$this::FILTER_TYPE_INT:
+                    \$returnValue =  filter_var(\$fieldValue,FILTER_SANITIZE_NUMBER_INT);
                     break;
 
-                case $this::FILTER_TYPE_FLOAT:
-                    $returnValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
+                case \$this::FILTER_TYPE_FLOAT:
+                    \$returnValue =  filter_var(\$fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
                     break;
 
-                case $this::FILTER_TYPE_BOOL:
-                    $returnValue =  boolval($fieldValue) ? 1 : 0 ;
+                case \$this::FILTER_TYPE_BOOL:
+                    \$returnValue =  boolval(\$fieldValue) ? 1 : 0 ;
                     break;
             }
 
-            $returnValue = $escapeChar.$returnValue.$escapeChar ;
-            if ( ($returnValue=='' || $returnValue == $escapeChar.$escapeChar) && $boolAllowsNull) {
-                return $escapeChar . NULL . $escapeChar;
+            \$returnValue = \$escapeChar.\$returnValue.\$escapeChar ;
+            if ( (\$returnValue=='' || \$returnValue == \$escapeChar.\$escapeChar) && \$boolAllowsNull) {
+                return \$escapeChar . NULL . \$escapeChar;
             }
-            elseif ( ($returnValue=='' || $returnValue == $escapeChar.$escapeChar) && $boolAllowsNull){
+            elseif ( (\$returnValue=='' || \$returnValue == \$escapeChar.\$escapeChar) && \$boolAllowsNull){
                 return false;
             }
-            else return $returnValue;
+            else return \$returnValue;
         }
     }
 FILTER_FUNCTION;
