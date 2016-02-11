@@ -85,11 +85,12 @@ Class DB_Connection {
         if (!$this->connection)
             return false;
 
-        $query = "SHOW TABLES";
-        /*$query =
+        //$query = "SHOW TABLES";
+        $query =
             'SELECT DISTINCT TABLE_NAME' . PHP_EOL .
-            'FROM INFORMATION_SCHEMA.COLUMNS' . PHP_EOL ;
-        */
+            'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
+            'WHERE TABLE_SCHEMA LIKE \'%' . $this->database . '\'';
+
 
         $res = mysqli_query($this->connection, $query);
 
