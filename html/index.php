@@ -252,12 +252,14 @@
                         var class_whole = data.whole;
                         var class_members = data.members;
                         var class_load = data.load;
+                        var class_save = data.save;
                         if (data.message != '') {
                             alert("Class creation attempted: " + data.message);
                         }
                         $("#class_whole").val(class_whole);
                         $("#class_members").val(class_members);
                         $("#class_load").val(class_load);
+                        $("#class_save").val(class_save);
 
                         $("#class_content").val(class_whole);
 

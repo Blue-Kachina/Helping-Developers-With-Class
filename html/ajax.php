@@ -95,6 +95,7 @@ switch ($_POST['action']) {
                 $template->SetAllColumns($result);
                 $class_members = $template->GetDeclaration_Members();
                 $class_load = $template->GetDeclaration_Load();
+                $class_save = $template->GetDeclaration_Save();
                 $class_whole = $template->GetDeclaration_WholeClass();
             }
         else{
@@ -106,6 +107,7 @@ switch ($_POST['action']) {
                 "whole" => $class_whole,
                 "members" => $class_members,
                 "load" => $class_load,
+                "save" => $class_save,
                 "success" => $success,
                 "message" => $msg
             )

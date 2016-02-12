@@ -19,10 +19,18 @@ define('CHAR_ESCAPE_FIELD_NAME' , '`');
 define('CHAR_ESCAPE_FIELD_VALUE' , '\'');
 
 
+
 Class ClassTemplate {
     private $table;
     private $columns = array();
     private $keyColumnIndexes = array();
+
+
+    private $dataTypes_numeric=array('tinyint','smallint','mediumint', 'int','bigint','float','double','decimal');
+    private $dataTypes_boolean=array('bit');
+    private $dataTypes_integer=array('tinyint','smallint','mediumint', 'int','bigint');
+    private $dataTypes_float=array('float','double','decimal');
+
 
     function __construct($param_table, $param_columns=[]){
         $this->table=$param_table;
@@ -50,7 +58,6 @@ Class ClassTemplate {
         return <<<CLASS_DECLARATION
 <?php
 require_once('Table.php');
-
 
 Class {$this->table} EXTENDS Table  {
 
@@ -172,21 +179,38 @@ LOAD_DECLARATION;
 COLUMN_IMPLOSION;
     }
 
+    private function GetFilterTypeNum($dataType){
+        switch (true){
+            case (in_array($dataType,$this->dataTypes_boolean)):
+                return '$this::FILTER_TYPE_BOOL';
+            case (in_array($dataType,$this->dataTypes_integer)):
+                return '$this::FILTER_TYPE_INT';
+            case (in_array($dataType,$this->dataTypes_float)):
+                return '$this::FILTER_TYPE_FLOAT';
+            default:
+                return '$this::FILTER_TYPE_STRING';
+        }
+    }
+
+
     public function GetDeclaration_TableMetadata(){
-        $widthInTabStops = 10;
+        $widthInTabStops = 8;
         $template =
             '    private function GetTableMetaAsAssocArray(){' . PHP_EOL .
             '        $record = array(' .PHP_EOL ;
         $countFields = count($this->columns);
         foreach($this->columns as $fieldNum => $field){
+            $boolQuoteWhenPopulating = !in_array($field[METADATA_FIELDNAME_TYPE], $this->dataTypes_numeric) ? 1 : 0;
+            $filterTypeNum = $this->GetFilterTypeNum($field[METADATA_FIELDNAME_TYPE]);
+
             $comma = $fieldNum < $countFields - 1 ? ',' : '' ;
             $thisField = $this->ColumnifyString("'{$field[METADATA_FIELDNAME_FIELD]}'=>" , $widthInTabStops)  ;
             $thisValue = $this->ColumnifyString('array(' , 3);
-            $thisValue .= $this->ColumnifyString('"Type"=>\''. addslashes("{$field[METADATA_FIELDNAME_TYPE]}") . "'," , $widthInTabStops + 5);
-            $thisValue .= $this->ColumnifyString('"Null"=>\''."{$field[METADATA_FIELDNAME_NULL]}'," , 4);
-            $thisValue .= $this->ColumnifyString('"Key"=>\''."{$field[METADATA_FIELDNAME_KEY]}'," , 4);
-            $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>1,' , 6);
-            $thisValue .= $this->ColumnifyString('"BoolEscapeSQLFieldName"=>1)' . $comma , 4)  . PHP_EOL;
+            $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_TYPE.'"=>\''. addslashes("{$field[METADATA_FIELDNAME_TYPE]}") . "'," , $widthInTabStops + 2);
+            $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_NULL.'"=>\''."{$field[METADATA_FIELDNAME_NULL]}'," , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_KEY.'"=>\''."{$field[METADATA_FIELDNAME_KEY]}'," , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>' . $filterTypeNum . ',' , $widthInTabStops + 4);
+            $thisValue .= $this->ColumnifyString('"BoolQuoteWhenPopulating"=>' . $boolQuoteWhenPopulating . ')' . $comma , $widthInTabStops)  . PHP_EOL;
             $template .= '			' . $thisField . $thisValue ;
         }
         $template .=
@@ -229,7 +253,7 @@ ASSOC_ARRAY;
 
             \$filterType = \$tableMeta[\$fieldName]['FilterTypeNum'];
             \$boolAllowsNull = \$tableMeta[\$fieldName][$metaFieldName] == 'YES' ? true : false ;
-            \$boolRequiresEscape = \$tableMeta[\$fieldName]['BoolEscapeSQLFieldName'];
+            \$boolRequiresEscape = \$tableMeta[\$fieldName]['BoolQuoteWhenPopulating'];
 
             \$escapeChar = \$boolRequiresEscape ? \$this::CHAR_ESCAPE_FIELD_VALUE : "";
 
