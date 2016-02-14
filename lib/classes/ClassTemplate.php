@@ -147,35 +147,32 @@ LOAD_DECLARATION;
         $_escapeName_pre = CHAR_ESCAPE_FIELD_NAME_PRE;
         $_escapeName_post = CHAR_ESCAPE_FIELD_NAME_POST;
         $_tableName = $this->table;
+        $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         return
 <<<COLUMN_IMPLOSION
     public function save() {
        \$db = get_db_connection();
        \$currentRecord = \$this->GetAssocArrayFromListOfFields();
-       if (empty(\$this->Host)) {
+       if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO $_escapeName_pre$_tableName$_escapeName_post'.
             ' ($_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)).'$_escapeName_post)' .
             ' VALUES ('.implode(', ', \$currentRecord).') ';
 			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord));
 			if (\$rs) {
-				\$this->Host = \$db->insertID();
-				get_msg_system()->addMessage('user' . \$this->Host. ' Saved Successfully.', Msg::GOOD);
+				\$this->$_fieldName = \$db->insertID();
 				return true;
 			} else {
-				get_msg_system()->addMessage('user' . \$this->Host . ' Save Failed. ' . \$db->errorMsg(), Msg::ERROR);
 				return false;
 			}
         }else{
             \$sql = 'UPDATE $_escapeName_pre$_tableName$_escapeName_post SET ' .
             '$_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)) . '$_escapeName_post = ?' .
-'   WHERE [Host] = ?';
+'   WHERE $_escapeName_pre$_fieldName$_escapeName_post = ?';
         \$rs = \$db->query(\$sql, null, null, \$currentRecord);
         if (\$rs) {
-            \$this->Host =  \$db->insertID();
-            get_msg_system()->addMessage('user ' . \$this->Host . ' Updated Successfully.', Msg::GOOD);
+            \$this->$_fieldName =  \$db->insertID();
             return true;
         } else {
-            get_msg_system()->addMessage('user ' . \$this->Host . ' Update Failed. ' . \$db->errorMsg(), Msg::ERROR);
             return false;
         }
     }
