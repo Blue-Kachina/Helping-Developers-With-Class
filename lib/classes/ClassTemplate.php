@@ -246,14 +246,14 @@ ASSOC_ARRAY;
     }
 
     public function GetDeclaration_FilterAndEscape(){
-        $metaFieldName = METADATA_FIELDNAME_FIELD;
+        $metaFieldNull = METADATA_FIELDNAME_NULL;
         return <<<FILTER_FUNCTION
     public function FilterAndEscapeField(\$fieldName){
         if(property_exists(\$this,\$fieldName)){
             \$tableMeta = \$this->GetTableMetaAsAssocArray();
 
             \$filterType = \$tableMeta[\$fieldName]['FilterTypeNum'];
-            \$boolAllowsNull = \$tableMeta[\$fieldName][$metaFieldName] == 'YES' ? true : false ;
+            \$boolAllowsNull = \$tableMeta[\$fieldName]['$metaFieldNull'] == 'YES' ? true : false ;
             \$boolRequiresEscape = \$tableMeta[\$fieldName]['BoolQuoteWhenPopulating'];
 
             \$escapeChar = \$boolRequiresEscape ? \$this::CHAR_ESCAPE_FIELD_VALUE : "";
