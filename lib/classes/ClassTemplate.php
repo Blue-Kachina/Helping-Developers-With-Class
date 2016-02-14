@@ -15,7 +15,8 @@ define('METADATA_FIELDNAME_KEY', 'COLUMN_KEY');
 define('METADATA_FIELDNAME_DEFAULT', 'COLUMN_DEFAULT');
 define('METADATA_FIELDNAME_EXTRA', 'EXTRA');
 
-define('CHAR_ESCAPE_FIELD_NAME' , '`');
+define('CHAR_ESCAPE_FIELD_NAME_PRE' , '`');
+define('CHAR_ESCAPE_FIELD_NAME_POST' , '`');
 define('CHAR_ESCAPE_FIELD_VALUE' , '\'');
 
 
@@ -68,7 +69,8 @@ Class {$this->table} EXTENDS Table  {
     const FILTER_TYPE_STRING = 4;
 
     const CHAR_ESCAPE_FIELD_VALUE = "'" ;
-    const CHAR_ESCAPE_FIELD_NAME = "`";
+    const CHAR_ESCAPE_FIELD_NAME_PRE = "`";
+    const CHAR_ESCAPE_FIELD_NAME_POST = "`";
 
 {$this->GetDeclaration_Members()}
 
@@ -120,7 +122,8 @@ CLASS_DECLARATION;
     }
 
     public function GetDeclaration_Load(){
-        $_escapeName = CHAR_ESCAPE_FIELD_NAME;
+        $_escapeName_pre = CHAR_ESCAPE_FIELD_NAME_PRE;
+        $_escapeName_post = CHAR_ESCAPE_FIELD_NAME_POST;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_tableName = $this->table;
 
@@ -128,7 +131,7 @@ CLASS_DECLARATION;
 <<<LOAD_DECLARATION
     public function load(\$param_$_fieldName) {
         \$db = get_db_connection();
-        \$sql = 'SELECT * FROM $_escapeName$_tableName$_escapeName WHERE $_escapeName$_fieldName$_escapeName = ?';
+        \$sql = 'SELECT * FROM $_escapeName_pre$_tableName$_escapeName_post WHERE $_escapeName_pre$_fieldName$_escapeName_post = ?';
         \$rs = \$db->query(\$sql, null, null, array(\$param_$_fieldName));
 
         if(\$rs && \$rs->rowCount() > 0) {
@@ -141,7 +144,8 @@ LOAD_DECLARATION;
     }
 
     public function GetDeclaration_Save(){
-        $_escapeName = CHAR_ESCAPE_FIELD_NAME;
+        $_escapeName_pre = CHAR_ESCAPE_FIELD_NAME_PRE;
+        $_escapeName_post = CHAR_ESCAPE_FIELD_NAME_POST;
         $_tableName = $this->table;
         return
 <<<COLUMN_IMPLOSION
@@ -149,8 +153,8 @@ LOAD_DECLARATION;
        \$db = get_db_connection();
        \$currentRecord = \$this->GetAssocArrayFromListOfFields();
        if (empty(\$this->Host)) {
-           \$sql = 'INSERT INTO $_escapeName$_tableName$_escapeName'.
-            ' ($_escapeName'.implode('$_escapeName, $_escapeName', array_keys(\$currentRecord)).'$_escapeName)' .
+           \$sql = 'INSERT INTO $_escapeName_pre$_tableName$_escapeName_post'.
+            ' ($_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)).'$_escapeName_post)' .
             ' VALUES ('.implode(', ', \$currentRecord).') ';
 			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord));
 			if (\$rs) {
@@ -162,8 +166,8 @@ LOAD_DECLARATION;
 				return false;
 			}
         }else{
-            \$sql = 'UPDATE $_escapeName$_tableName$_escapeName SET ' .
-            '$_escapeName'.implode('$_escapeName, $_escapeName', array_keys(\$currentRecord)) . '$_escapeName = ?' .
+            \$sql = 'UPDATE $_escapeName_pre$_tableName$_escapeName_post SET ' .
+            '$_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)) . '$_escapeName_post = ?' .
 '   WHERE [Host] = ?';
         \$rs = \$db->query(\$sql, null, null, \$currentRecord);
         if (\$rs) {
