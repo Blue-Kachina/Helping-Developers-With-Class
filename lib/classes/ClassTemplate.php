@@ -144,15 +144,18 @@ LOAD_DECLARATION;
     }
 
     public function GetDeclaration_Save(){
+        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
         $_escapeName_pre = CHAR_ESCAPE_FIELD_NAME_PRE;
         $_escapeName_post = CHAR_ESCAPE_FIELD_NAME_POST;
         $_tableName = $this->table;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         return
 <<<COLUMN_IMPLOSION
-    public function save() {
+    public function save(\$listOfFields = "*") {
+    if (\$listOfFields=='*')
+        \$listOfFields=$fieldArray;
        \$db = get_db_connection();
-       \$currentRecord = \$this->GetAssocArrayFromListOfFields();
+       \$currentRecord = \$this->GetAssocArrayFromListOfFields(\$listOfFields);
        if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO $_escapeName_pre$_tableName$_escapeName_post'.
             ' ($_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)).'$_escapeName_post)' .
