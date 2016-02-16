@@ -56,8 +56,17 @@ Class ClassTemplate {
     }
 
     public function GetDeclaration_WholeClass(){
+
+        $currentUser = $_SERVER['REMOTE_USER'];
+        $currentDateTime = date("F j, Y, g:i a");
+
         return <<<CLASS_DECLARATION
 <?php
+/**
+ * Created by "Helping Developers With Class".
+ * User: $currentUser
+ * Timestamp: $currentDateTime
+ */
 require_once('Table.php');
 
 Class {$this->table} EXTENDS Table  {
