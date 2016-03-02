@@ -57,7 +57,8 @@ Class ClassTemplate {
 
     public function GetDeclaration_WholeClass(){
 
-        $currentUser = $_SERVER['REMOTE_USER'];
+        $currentUser = getenv('USERNAME') ?: getenv('USER');
+
         $currentDateTime = date("F j, Y, g:i a");
 
         return <<<CLASS_DECLARATION
