@@ -27,21 +27,45 @@ Class DB_Connection {
     }
 
     function __destruct(){
-        if(isset($this->connection))
-        mysqli_close($this->connection);
+        //if(isset($this->connection))
+        //mysqli_close($this->connection);
     }
 
-    public function AttemptConnection(){
-        $this->connection = mysqli_connect($this->address,$this->username,$this->password,$this->database);
 
-        if(!$this->connection){
-            $this->lastErrorMessage=
-            "Error: Unable to connect to MySQL." . PHP_EOL .
-            "Debugging errno: " . mysqli_connect_errno() . PHP_EOL .
-            "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+
+    //Attempt Connection
+    public function AttemptConnection()
+    {
+        if (empty($this->type)) {
+            return false;
+        }
+
+        //MySQL
+        elseif ($this->type == "MySQL") {
+            $this->connection = mysqli_connect($this->address, $this->username, $this->password, $this->database);
+
+            if (!$this->connection) {
+                $this->lastErrorMessage =
+                    "Error: Unable to connect to MySQL." . PHP_EOL .
+                    "Debugging errno: " . mysqli_connect_errno() . PHP_EOL .
+                    "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+                return false;
+            }
+
+        //SQL Server
+        } elseif ($this->type == "SQL Server") {
+            $connectionInfo = array( "Database"=>$this->database, "UID"=>$this->username, "PWD"=>$this->password);
+            $this->connection = sqlsrv_connect($this->address, $connectionInfo);
+            if (!$this->connection) {
+                $this->lastErrorMessage =
+                    "Error: Unable to connect to SQL Server." . PHP_EOL .
+                    "Debugging error: " . sqlsrv_errors() . PHP_EOL;
+                return false;
+            }
         }
         return $this->connection;
     }
+
 
     public function GetLastErrorMessage(){
         return $this->lastErrorMessage;
@@ -63,28 +87,88 @@ Class DB_Connection {
         }
     }
 
-    public function ReturnColumnData()
+
+    //Gets a list of the tables in the selected database.  Returns them as options for within an HTML select element
+    public function returnTableNameOptions()
     {
 
+        $tableList = "";
+        $allTables = array();
+
+        if(empty($this->type)){
+            return false;
+        }
+        elseif($this->type=="MySQL"){
+            $allTables = $this->ReturnTableNames_MySQL();
+        }
+        elseif($this->type="SQL Server"){
+            $allTables = $this->ReturnTableNames_SQL_Server();
+        }
+
+        foreach ($allTables as $table) {
+            $tableList .= "<option value =\"$table\">$table</option>";
+        }
+        return $tableList;
+    }
+
+
+
+    public function ReturnColumnData()
+    {
         $this->AttemptConnection();
         if (!$this->connection)
             return false;
 
-        //$query = "SHOW COLUMNS IN " . filter_var($this->table, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $query =
-            'SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA ' . PHP_EOL .
-            'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
-            'WHERE TABLE_SCHEMA = \'' . filter_var($this->database,FILTER_SANITIZE_STRING) . '\' AND ' .PHP_EOL .
-            'TABLE_NAME = \'' . filter_var($this->table,FILTER_SANITIZE_STRING) . '\'';
 
-        if ($result = mysqli_query($this->connection, $query)) {
-            return mysqli_fetch_all($result,MYSQLI_ASSOC);
+        if($this->type == "MySQL") {
+            $query =
+                'SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA ' . PHP_EOL .
+                'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
+                'WHERE TABLE_SCHEMA = \'' . filter_var($this->database, FILTER_SANITIZE_STRING) . '\' AND ' . PHP_EOL .
+                'TABLE_NAME = \'' . filter_var($this->table, FILTER_SANITIZE_STRING) . '\'';
 
-        }else return false;
+            if ($result = mysqli_query($this->connection, $query)) {
+                return mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+            } else return false;
+        }
+        elseif($this->type == "SQL Server")
+        {
+            $tableName = filter_var($this->table, FILTER_SANITIZE_STRING);
+            $columnList=array();
+            $query=<<<FETCH_COLUMNS
+                SELECT
+                    c.name 'COLUMN_NAME',
+                    t.Name 'DATA_TYPE',
+                    c.is_nullable 'IS_NULLABLE',
+                    ISNULL(i.is_primary_key, 0) 'COLUMN_KEY',
+                    c.max_length 'MAX_LENGTH',
+                    '' 'COLUMN_DEFAULT',
+                    '' 'EXTRA'
+                FROM
+                    sys.columns c
+                INNER JOIN
+                    sys.types t ON c.user_type_id = t.user_type_id
+                LEFT OUTER JOIN
+                    sys.index_columns ic ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                LEFT OUTER JOIN
+                    sys.indexes i ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+                WHERE
+                    c.object_id = OBJECT_ID('$tableName')
+FETCH_COLUMNS;
+            $stmt = sqlsrv_query( $this->connection, $query );
+            while($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)){
+                $columnList[]=$row;
+            }
+            return $columnList;
+        }
+        return false;
     }
 
-    public function returnTableNameOptions()
-    {
+
+
+
+    private function ReturnTableNames_MySQL(){
         $tableList="";
         $this->connection = $this->AttemptConnection();
         if (!$this->connection)
@@ -98,9 +182,24 @@ Class DB_Connection {
 
 
         $res = mysqli_query($this->connection, $query);
+        return mysqli_fetch_array($res);
+    }
 
-        while ($row = mysqli_fetch_array($res)) {
-            $tableList .= "<option value =\"$row[0]\">$row[0]</option>";
+    private function ReturnTableNames_SQL_Server(){
+        $tableList=array();
+        $this->connection = $this->AttemptConnection();
+        if (!$this->connection)
+            return false;
+
+        $query =<<<GET_TABLENAMES
+SELECT DISTINCT TABLE_NAME
+FROM {$this->database}.INFORMATION_SCHEMA.COLUMNS
+ORDER BY TABLE_NAME;
+GET_TABLENAMES;
+
+        $stmt = sqlsrv_query( $this->connection, $query );
+        while($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC)){
+            $tableList[]=$row[0];
         }
         return $tableList;
     }

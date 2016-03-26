@@ -52,7 +52,8 @@
                                         <label>Type</label>
                                           <select name="serverType" class="form-control" id="serverType">
                                               <option disabled="">- Server Type -</option>
-                                              <option value="mysql" selected="selected"> MySQL </option>
+                                              <option value="MySQL" selected="selected"> MySQL </option>
+                                              <option value="SQL Server"> MS SQL Server </option>
                                           </select>
                                       </div>
                                   </div>

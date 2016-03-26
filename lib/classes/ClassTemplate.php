@@ -25,6 +25,7 @@ Class ClassTemplate {
     private $table;
     private $columns = array();
     private $keyColumnIndexes = array();
+    private $dbType;
 
 
     private $dataTypes_numeric=array('tinyint','smallint','mediumint', 'int','bigint','float','double','decimal');
@@ -33,8 +34,9 @@ Class ClassTemplate {
     private $dataTypes_float=array('float','double','decimal');
 
 
-    function __construct($param_table, $param_columns=[]){
+    function __construct($param_table, $param_columns=[], $dbType="MySQL"){
         $this->table=$param_table;
+        $this->dbType=$dbType;
         foreach ($param_columns as $columnIndex => $column){
             $this->AddColumn($column);
         }
@@ -46,7 +48,7 @@ Class ClassTemplate {
         $arraySize = count($this->columns);
 
         //Add the column to keyColumnIndexes when applicable
-        if (array_key_exists(METADATA_FIELDNAME_KEY,$column) && strtoupper($column[METADATA_FIELDNAME_KEY])=='PRI'){
+        if (array_key_exists(METADATA_FIELDNAME_KEY,$column) && (strtoupper($column[METADATA_FIELDNAME_KEY])=='PRI' || strtoupper($column[METADATA_FIELDNAME_KEY])=='1')){
             $this->keyColumnIndexes[]= ($arraySize - 1) ;
         }
     }
@@ -58,8 +60,17 @@ Class ClassTemplate {
     public function GetDeclaration_WholeClass(){
 
         $currentUser = getenv('USERNAME') ?: getenv('USER');
-
         $currentDateTime = date("F j, Y, g:i a");
+        $escapeFieldPre = "";
+        $escapeFieldPost = "";
+        if($this->dbType=="MySQL"){
+            $escapeFieldPre="`";
+            $escapeFieldPost="`";
+        }
+        elseif($this->dbType=="SQL Server"){
+            $escapeFieldPre="[";
+            $escapeFieldPost="]";
+        }
 
         return <<<CLASS_DECLARATION
 <?php
@@ -79,8 +90,8 @@ Class {$this->table} EXTENDS Table  {
     const FILTER_TYPE_STRING = 4;
 
     const CHAR_ESCAPE_FIELD_VALUE = "'" ;
-    const CHAR_ESCAPE_FIELD_NAME_PRE = "`";
-    const CHAR_ESCAPE_FIELD_NAME_POST = "`";
+    const CHAR_ESCAPE_FIELD_NAME_PRE = "$escapeFieldPre";
+    const CHAR_ESCAPE_FIELD_NAME_POST = "$escapeFieldPost";
 
 {$this->GetDeclaration_Members()}
 

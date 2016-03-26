@@ -28,6 +28,7 @@ if (
 $connection = new DB_Connection($_POST['serverType'], $_POST['serverAddress'], $_POST['serverUsername'], $_POST['serverPassword'], $_POST['serverDatabase']);
 $success = false;
 $msg = "";
+
 $link = $connection->AttemptConnection();
 
 
@@ -90,8 +91,9 @@ switch ($_POST['action']) {
         $success = true;
 
         $result = $connection->ReturnColumnData();
+        //var_dump($result);
             if ($result) {
-                $template = new ClassTemplate($tableName, $result);
+                $template = new ClassTemplate($tableName, $result, "SQL Server");
                 $template->SetAllColumns($result);
                 $class_members = $template->GetDeclaration_Members();
                 $class_load = $template->GetDeclaration_Load();
