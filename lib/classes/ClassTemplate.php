@@ -177,6 +177,7 @@ LOAD_DECLARATION;
         $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
         $_tableName = $this->table;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
+        $_fieldValue = "\$this->{$_fieldName}";
         return
 <<<COLUMN_IMPLOSION
     public function save(\$listOfFields = "*") {
@@ -200,7 +201,7 @@ LOAD_DECLARATION;
             \$sql = 'UPDATE {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} SET ' .
             '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', array_keys(\$currentRecord_assoc) ) . '{$this->char_escapeNamePost}=? ' .
 '   WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
-        \$currentRecord_numeric[] = $_fieldName;
+        \$currentRecord_numeric[] = $_fieldValue;
         \$rs = \$db->query(\$sql, null, null, \$currentRecord_numeric);
         if (\$rs) {
             \$this->$_fieldName =  \$db->insertID();
