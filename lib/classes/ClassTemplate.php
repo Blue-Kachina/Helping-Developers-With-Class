@@ -15,9 +15,13 @@ define('METADATA_FIELDNAME_KEY', 'COLUMN_KEY');
 define('METADATA_FIELDNAME_DEFAULT', 'COLUMN_DEFAULT');
 define('METADATA_FIELDNAME_EXTRA', 'EXTRA');
 
-define('CHAR_ESCAPE_FIELD_NAME_PRE' , '`');
-define('CHAR_ESCAPE_FIELD_NAME_POST' , '`');
-define('CHAR_ESCAPE_FIELD_VALUE' , '\'');
+
+
+
+
+//define('CHAR_ESCAPE_FIELD_NAME_PRE' , '`');
+//define('CHAR_ESCAPE_FIELD_NAME_POST' , '`');
+//define('CHAR_ESCAPE_FIELD_VALUE' , '\'');
 
 
 
@@ -27,16 +31,31 @@ Class ClassTemplate {
     private $keyColumnIndexes = array();
     private $dbType;
 
+    public $char_escapeNamePre = "";
+    public $char_escapeNamePost = "";
+    public $char_escapeValue = "'";
 
     private $dataTypes_numeric=array('tinyint','smallint','mediumint', 'int','bigint','float','double','decimal');
     private $dataTypes_boolean=array('bit');
     private $dataTypes_integer=array('tinyint','smallint','mediumint', 'int','bigint');
     private $dataTypes_float=array('float','double','decimal');
 
-
     function __construct($param_table, $param_columns=[], $dbType="MySQL"){
         $this->table=$param_table;
         $this->dbType=$dbType;
+
+        if($this->dbType=="MySQL"){
+            $this->char_escapeNamePre ="`";
+            $this->char_escapeNamePost ="`";
+            $this->char_escapeValue = "'";
+        }
+        elseif($this->dbType=="SQL Server"){
+            $this->char_escapeNamePre ="[";
+            $this->char_escapeNamePost ="]";
+            $this->char_escapeValue = "'";
+        }
+
+
         foreach ($param_columns as $columnIndex => $column){
             $this->AddColumn($column);
         }
@@ -61,16 +80,6 @@ Class ClassTemplate {
 
         $currentUser = getenv('USERNAME') ?: getenv('USER');
         $currentDateTime = date("F j, Y, g:i a");
-        $escapeFieldPre = "";
-        $escapeFieldPost = "";
-        if($this->dbType=="MySQL"){
-            $escapeFieldPre="`";
-            $escapeFieldPost="`";
-        }
-        elseif($this->dbType=="SQL Server"){
-            $escapeFieldPre="[";
-            $escapeFieldPost="]";
-        }
 
         return <<<CLASS_DECLARATION
 <?php
@@ -89,9 +98,9 @@ Class {$this->table} EXTENDS Table  {
     const FILTER_TYPE_FLOAT = 3;
     const FILTER_TYPE_STRING = 4;
 
-    const CHAR_ESCAPE_FIELD_VALUE = "'" ;
-    const CHAR_ESCAPE_FIELD_NAME_PRE = "$escapeFieldPre";
-    const CHAR_ESCAPE_FIELD_NAME_POST = "$escapeFieldPost";
+    const CHAR_ESCAPE_FIELD_VALUE = "{$this->char_escapeValue}" ;
+    const CHAR_ESCAPE_FIELD_NAME_PRE = "{$this->char_escapeNamePre}";
+    const CHAR_ESCAPE_FIELD_NAME_POST = "{$this->char_escapeNamePost}";
 
 {$this->GetDeclaration_Members()}
 
@@ -102,6 +111,8 @@ Class {$this->table} EXTENDS Table  {
 {$this->GetDeclaration_Save()}
 
 {$this->GetDeclaration_AssocArray()}
+
+{$this->GetDeclaration_NumericArray()}
 
 {$this->GetDeclaration_FilterAndEscape()}
 
@@ -143,8 +154,6 @@ CLASS_DECLARATION;
     }
 
     public function GetDeclaration_Load(){
-        $_escapeName_pre = CHAR_ESCAPE_FIELD_NAME_PRE;
-        $_escapeName_post = CHAR_ESCAPE_FIELD_NAME_POST;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_tableName = $this->table;
 
@@ -152,7 +161,7 @@ CLASS_DECLARATION;
 <<<LOAD_DECLARATION
     public function load(\$param_$_fieldName) {
         \$db = get_db_connection();
-        \$sql = 'SELECT * FROM $_escapeName_pre$_tableName$_escapeName_post WHERE $_escapeName_pre$_fieldName$_escapeName_post = ?';
+        \$sql = 'SELECT * FROM {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
         \$rs = \$db->query(\$sql, null, null, array(\$param_$_fieldName));
 
         if(\$rs && \$rs->rowCount() > 0) {
@@ -166,8 +175,6 @@ LOAD_DECLARATION;
 
     public function GetDeclaration_Save(){
         $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
-        $_escapeName_pre = CHAR_ESCAPE_FIELD_NAME_PRE;
-        $_escapeName_post = CHAR_ESCAPE_FIELD_NAME_POST;
         $_tableName = $this->table;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         return
@@ -176,12 +183,13 @@ LOAD_DECLARATION;
     if (\$listOfFields=='*')
         \$listOfFields=$fieldArray;
        \$db = get_db_connection();
-       \$currentRecord = \$this->GetAssocArrayFromListOfFields(\$listOfFields);
+       \$currentRecord_assoc = \$this->GetAssocArrayFromListOfFields(\$listOfFields);
+       \$currentRecord_numeric = \$this->GetNumericArrayFromListOfFields(\$listOfFields);
        if (empty(\$this->$_fieldName)) {
-           \$sql = 'INSERT INTO $_escapeName_pre$_tableName$_escapeName_post'.
-            ' ($_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)).'$_escapeName_post)' .
-            ' VALUES ('.implode(', ', \$currentRecord).') ';
-			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord));
+           \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
+            ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', array_keys(\$currentRecord_assoc)).'{$this->char_escapeNamePost})' .
+            ' VALUES ('.implode(', ', \$currentRecord_assoc).') ';
+			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord_numeric));
 			if (\$rs) {
 				\$this->$_fieldName = \$db->insertID();
 				return true;
@@ -189,10 +197,11 @@ LOAD_DECLARATION;
 				return false;
 			}
         }else{
-            \$sql = 'UPDATE $_escapeName_pre$_tableName$_escapeName_post SET ' .
-            '$_escapeName_pre'.implode('$_escapeName_post, $_escapeName_pre', array_keys(\$currentRecord)) . '$_escapeName_post = ?' .
-'   WHERE $_escapeName_pre$_fieldName$_escapeName_post = ?';
-        \$rs = \$db->query(\$sql, null, null, \$currentRecord);
+            \$sql = 'UPDATE {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} SET ' .
+            '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', array_keys(\$currentRecord_assoc) ) . '{$this->char_escapeNamePost}=? ' .
+'   WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
+        \$currentRecord_numeric[] = $_fieldName;
+        \$rs = \$db->query(\$sql, null, null, \$currentRecord_numeric);
         if (\$rs) {
             \$this->$_fieldName =  \$db->insertID();
             return true;
@@ -262,6 +271,29 @@ COLUMN_IMPLOSION;
             \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$this::CHAR_ESCAPE_FIELD_VALUE . \$this::CHAR_ESCAPE_FIELD_VALUE;
             if (!\$boolIsAnEmpty || !\$excludeEmpties)
                 \$result[\$fieldName] = \$filteredResult;
+            }
+        }
+        return \$result;
+    }
+ASSOC_ARRAY;
+    }
+
+    public function GetDeclaration_NumericArray(){
+        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
+
+        return
+<<<ASSOC_ARRAY
+    public function GetNumericArrayFromListOfFields(\$listOfFields = "*", \$excludeEmpties = false)
+    {
+    if (\$listOfFields=='*')
+        \$listOfFields=$fieldArray;
+    \$result = array();
+    foreach (\$listOfFields as \$myIndex=>\$fieldName) {
+        if (property_exists(\$this, \$fieldName)) {
+            \$filteredResult = \$this->FilterAndEscapeField(\$fieldName);
+            \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$this::CHAR_ESCAPE_FIELD_VALUE . \$this::CHAR_ESCAPE_FIELD_VALUE;
+            if (!\$boolIsAnEmpty || !\$excludeEmpties)
+                \$result[\$myIndex] = \$filteredResult;
             }
         }
         return \$result;
