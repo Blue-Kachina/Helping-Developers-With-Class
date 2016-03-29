@@ -397,11 +397,11 @@ ASSOC_ARRAY;
 				$boolExcludeMe = (!$boolIncludeEmpties && $boolIsEmpty) || (!$boolIncludeNulls && $boolIsNull);
 				$i = -1;
 				if(!$boolExcludeMe){
-					$i++
-					if($arrayType==ARRAY_TYPE_ASSOC || $arrayType==ARRAY_TYPE_BOTH){
+					$i++;
+					if($arrayType==$this::ARRAY_TYPE_ASSOC || $arrayType==$this::ARRAY_TYPE_BOTH){
 						echo $result[$fieldName]="<<Insert Code To Filter And Escape>>";
 					}
-					if(0){
+					if($arrayType==$this::ARRAY_TYPE_NUMERIC || $arrayType==$this::ARRAY_TYPE_BOTH){
 						echo $result[$i]="<<Insert Code To Filter And Escape>>";
 					}
 				}
