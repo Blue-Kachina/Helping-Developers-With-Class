@@ -120,6 +120,10 @@ Class {$this->table} EXTENDS Table  {
     const FILTER_TYPE_FLOAT = 3;
     const FILTER_TYPE_STRING = 4;
 
+    const ARRAY_TYPE_NUMERIC = 1;
+    const ARRAY_TYPE_ASSOC = 2;
+    const ARRAY_TYPE_BOTH = 3;
+
     const CHAR_ESCAPE_FIELD_VALUE = "{$this->char_escapeValue}" ;
     const CHAR_ESCAPE_FIELD_NAME_PRE = "{$this->char_escapeNamePre}";
     const CHAR_ESCAPE_FIELD_NAME_POST = "{$this->char_escapeNamePost}";
