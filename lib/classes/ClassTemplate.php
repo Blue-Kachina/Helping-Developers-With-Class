@@ -136,6 +136,8 @@ Class {$this->table} EXTENDS Table  {
 
 {$this->GetDeclaration_NumericArray()}
 
+{$this->GetDeclaration_ArrayOfFieldValues()}
+
 {$this->GetDeclaration_FilterAndEscape()}
 
 }
@@ -375,6 +377,41 @@ ASSOC_ARRAY;
 ASSOC_ARRAY;
     }
 
+    
+    
+    public function GetDeclaration_ArrayOfFieldValues(){
+        return <<<'ARRAY_DECLARATION'
+	public function GetArrayOfFieldValues($listOfFields='*', $arrayType=ARRAY_TYPE_ASSOC, $boolUseSanitizeFilters=false, $boolEncapsulateInQuotes=false, $boolIncludeEmpties=true, $boolIncludeNulls=true){
+		if ($listOfFields=='*')
+			$listOfFields=$this->allFieldNames;
+		$result = array();
+		foreach ($listOfFields as $myIndex=>$fieldName) {
+			if (property_exists($this, $fieldName)) {
+				$myValue=$this->$fieldName;
+				$boolIsNull = is_null($myValue);
+				$boolIsEmpty = ( isset($myValue) && empty($myValue) ) && ( $myValue !== FALSE && $myValue !== 0 && $myValue !== 0.0 && $myValue !== array() );
+				$boolExcludeMe = (!$boolIncludeEmpties && $boolIsEmpty) || (!$boolIncludeNulls && $boolIsNull);
+				$i = -1;
+				if(!$boolExcludeMe){
+					$i++
+					if($arrayType==ARRAY_TYPE_ASSOC || $arrayType==ARRAY_TYPE_BOTH){
+						echo $result[$fieldName]="<<Insert Code To Filter And Escape>>";
+					}
+					if(0){
+						echo $result[$i]="<<Insert Code To Filter And Escape>>";
+					}
+				}
+			}
+		}
+	}
+ARRAY_DECLARATION;
+
+    }
+    
+    
+    
+    
+    
     /**
      * @return string
      */
