@@ -388,10 +388,13 @@ ASSOC_ARRAY;
 	public function GetArrayOfFieldValues(\$listOfFields='*', \$arrayType=$this->table::ARRAY_TYPE_ASSOC, \$boolUseSanitizeFilters=false, \$boolEncapsulateInQuotes=false, \$boolIncludeEmpties=true, \$boolIncludeNulls=true){
 		if (\$listOfFields=='*')
 			\$listOfFields=\$this->allFieldNames;
+
+        \$tableMeta=\$this->GetTableMetaAsAssocArray();
 		\$result = array();
 		foreach (\$listOfFields as \$myIndex=>\$fieldName) {
 			if (property_exists(\$this, \$fieldName)) {
 				\$myValue=\$this->\$fieldName;
+                \$myMeta=\$tableMeta[\$fieldName];
 				\$boolIsNull = is_null(\$myValue);
 				\$boolIsEmpty = ( isset(\$myValue) && empty(\$myValue) ) && ( \$myValue !== FALSE && \$myValue !== 0 && \$myValue !== 0.0 && \$myValue !== array() );
 				\$boolExcludeMe = (!\$boolIncludeEmpties && \$boolIsEmpty) || (!\$boolIncludeNulls && \$boolIsNull);
@@ -399,10 +402,10 @@ ASSOC_ARRAY;
 				if(!\$boolExcludeMe){
 					\$i++;
 					if(\$arrayType==\$this::ARRAY_TYPE_ASSOC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
-						echo \$result[\$fieldName]="<<Insert Code To Filter And Escape>>";
+						echo \$result[\$fieldName]='parent::ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes)';
 					}
 					if(\$arrayType==\$this::ARRAY_TYPE_NUMERIC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
-						echo \$result[\$i]="<<Insert Code To Filter And Escape>>";
+						echo \$result[\$i]='parent::ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes)';
 					}
 				}
 			}
