@@ -17,14 +17,6 @@ define('METADATA_FIELDNAME_EXTRA', 'EXTRA');
 
 
 
-
-
-//define('CHAR_ESCAPE_FIELD_NAME_PRE' , '`');
-//define('CHAR_ESCAPE_FIELD_NAME_POST' , '`');
-//define('CHAR_ESCAPE_FIELD_VALUE' , '\'');
-
-
-
 Class ClassTemplate {
     private $table;
     private $columns = array();
@@ -40,6 +32,15 @@ Class ClassTemplate {
     private $dataTypes_integer=array('tinyint','smallint','mediumint', 'int','bigint');
     private $dataTypes_float=array('float','double','decimal');
 
+
+
+
+
+    /**
+     * @param $param_table
+     * @param array $param_columns
+     * @param string $dbType
+     */
     function __construct($param_table, $param_columns=[], $dbType="MySQL"){
         $this->table=$param_table;
         $this->dbType=$dbType;
@@ -53,14 +54,23 @@ Class ClassTemplate {
             $this->char_escapeNamePre ="[";
             $this->char_escapeNamePost ="]";
             $this->char_escapeValue = "'";
+        }else{
+            $this->char_escapeNamePre ="";
+            $this->char_escapeNamePost ="";
+            $this->char_escapeValue = "";
         }
-
 
         foreach ($param_columns as $columnIndex => $column){
             $this->AddColumn($column);
         }
     }
 
+
+
+
+    /**
+     * @param $column
+     */
     public function AddColumn($column){
         $this->columns[] = $column;
 
@@ -72,10 +82,22 @@ Class ClassTemplate {
         }
     }
 
+
+
+
+    /**
+     * @param $allColumns
+     */
     public function SetAllColumns($allColumns){
         $this->columns=$allColumns;
     }
 
+
+
+
+    /**
+     * @return string
+     */
     public function GetDeclaration_WholeClass(){
 
         $currentUser = getenv('USERNAME') ?: getenv('USER');
@@ -88,7 +110,7 @@ Class ClassTemplate {
  * User: $currentUser
  * Timestamp: $currentDateTime
  */
-require_once('Table.php');
+require_once(DIR_ROOT . '/lib/classes/tables/Table.php');
 
 Class {$this->table} EXTENDS Table  {
 
@@ -120,6 +142,14 @@ Class {$this->table} EXTENDS Table  {
 CLASS_DECLARATION;
     }
 
+
+
+
+
+
+    /**
+     * @return string
+     */
     public function GetDeclaration_Members(){
         $widthInTabStops = 10;
 
@@ -145,6 +175,9 @@ CLASS_DECLARATION;
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_EXTRA], 4);
             $output .= PHP_EOL;
         }
+        $output .= PHP_EOL;
+        $output .= '    public $allFieldNames = array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\');' . PHP_EOL;
+        $output .= PHP_EOL;
 
         //A message to alert developers who might use this class.  Any non-field related properties that they might add to this class should be added the following comment.  Doing so will allow for easy updates to this class using this utility at a later time
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
@@ -153,6 +186,13 @@ CLASS_DECLARATION;
         return $output;
     }
 
+
+
+
+
+    /**
+     * @return string
+     */
     public function GetDeclaration_Load(){
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_tableName = $this->table;
@@ -173,8 +213,15 @@ LOAD_DECLARATION;
         return $declaration;
     }
 
+
+
+
+
+
+    /**
+     * @return string
+     */
     public function GetDeclaration_Save(){
-        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
         $_tableName = $this->table;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_fieldValue = "\$this->{$_fieldName}";
@@ -182,14 +229,14 @@ LOAD_DECLARATION;
 <<<COLUMN_IMPLOSION
     public function save(\$listOfFields = "*") {
     if (\$listOfFields=='*')
-        \$listOfFields=$fieldArray;
+        \$listOfFields=\$this->allFieldNames;
        \$db = get_db_connection();
        \$currentRecord_assoc = \$this->GetAssocArrayFromListOfFields(\$listOfFields);
        \$currentRecord_numeric = \$this->GetNumericArrayFromListOfFields(\$listOfFields);
        if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
             ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', array_keys(\$currentRecord_assoc)).'{$this->char_escapeNamePost})' .
-            ' VALUES ('.implode(', ', \$currentRecord_assoc).') ';
+            ' VALUES ('. str_repeat ( '?,' , count(\$listOfFields)-1) .'?) ';
 			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord_numeric));
 			if (\$rs) {
 				\$this->$_fieldName = \$db->insertID();
@@ -214,6 +261,14 @@ LOAD_DECLARATION;
 COLUMN_IMPLOSION;
     }
 
+
+
+
+
+    /**
+     * @param $dataType
+     * @return string
+     */
     private function GetFilterTypeNum($dataType){
         switch (true){
             case (in_array($dataType,$this->dataTypes_boolean)):
@@ -228,6 +283,13 @@ COLUMN_IMPLOSION;
     }
 
 
+
+
+
+
+    /**
+     * @return string
+     */
     public function GetDeclaration_TableMetadata(){
         $widthInTabStops = 8;
         $template =
@@ -256,15 +318,20 @@ COLUMN_IMPLOSION;
         return $template;
     }
 
-    public function GetDeclaration_AssocArray(){
-        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
 
+
+
+
+    /**
+     * @return string
+     */
+    public function GetDeclaration_AssocArray(){
         return
 <<<ASSOC_ARRAY
     public function GetAssocArrayFromListOfFields(\$listOfFields = "*", \$excludeEmpties = false)
     {
     if (\$listOfFields=='*')
-        \$listOfFields=$fieldArray;
+        \$listOfFields=\$this->allFieldNames;
     \$result = array();
     foreach (\$listOfFields as \$fieldName) {
         if (property_exists(\$this, \$fieldName)) {
@@ -279,15 +346,21 @@ COLUMN_IMPLOSION;
 ASSOC_ARRAY;
     }
 
+
+
+
+
+    /**
+     * @return string
+     */
     public function GetDeclaration_NumericArray(){
-        $fieldArray = 'array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\')';
 
         return
 <<<ASSOC_ARRAY
     public function GetNumericArrayFromListOfFields(\$listOfFields = "*", \$excludeEmpties = false)
     {
     if (\$listOfFields=='*')
-        \$listOfFields=$fieldArray;
+        \$listOfFields=\$this->allFieldNames;
     \$result = array();
     foreach (\$listOfFields as \$myIndex=>\$fieldName) {
         if (property_exists(\$this, \$fieldName)) {
@@ -302,6 +375,9 @@ ASSOC_ARRAY;
 ASSOC_ARRAY;
     }
 
+    /**
+     * @return string
+     */
     public function GetDeclaration_FilterAndEscape(){
         $metaFieldNull = METADATA_FIELDNAME_NULL;
         return <<<FILTER_FUNCTION
@@ -351,6 +427,11 @@ FILTER_FUNCTION;
     }
 
 
+    /**
+     * @param $myString
+     * @param $columnWidthInTabStops
+     * @return string
+     */
     private static function ColumnifyString($myString, $columnWidthInTabStops){
         $numRepetitionsGuess =$columnWidthInTabStops - (floor(strlen($myString)/4)) ;
         $numRepetitions= $numRepetitionsGuess >0 ? $numRepetitionsGuess : 0 ;

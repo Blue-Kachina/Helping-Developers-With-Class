@@ -19,24 +19,24 @@ Class Activity EXTENDS Table  {
     const CHAR_ESCAPE_FIELD_NAME_POST = "]";
 
 
-//          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA			
+//          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public $activity_p;					//int									0				1												
-    public $activityName;				//nvarchar								1				0												
-    public $activityNumber;				//nvarchar								1				0												
-    public $status;						//nvarchar								1				0												
-    public $projectID_f;				//int									1				0												
-    public $element_num;				//int									1				0												
-    public $plan_start_date;			//date									1				0												
-    public $plannedhours;				//float									1				0												
-    public $phase_name;					//nvarchar								1				0												
-    public $zkRecord_No;				//nvarchar								1				0												
-    public $za_endDate_display;			//date									1				0												
-    public $type;						//nvarchar								1				0												
-    public $rate;						//float									1				0												
-    public $percent_complete;			//float									1				0												
-    public $billableOrNonBillable;		//nvarchar								1				0												
-    public $planned_hours_remaining;	//float									1				0												
+    public $activity_p;					//int									0				1
+    public $activityName;				//nvarchar								1				0
+    public $activityNumber;				//nvarchar								1				0
+    public $status;						//nvarchar								1				0
+    public $projectID_f;				//int									1				0
+    public $element_num;				//int									1				0
+    public $plan_start_date;			//date									1				0
+    public $plannedhours;				//float									1				0
+    public $phase_name;					//nvarchar								1				0
+    public $zkRecord_No;				//nvarchar								1				0
+    public $za_endDate_display;			//date									1				0
+    public $type;						//nvarchar								1				0
+    public $rate;						//float									1				0
+    public $percent_complete;			//float									1				0
+    public $billableOrNonBillable;		//nvarchar								1				0
+    public $planned_hours_remaining;	//float									1				0
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //If you create any properties that aren't associated with a field from this table, please define them underneath this line
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
