@@ -14,6 +14,7 @@ define('METADATA_FIELDNAME_NULL', 'IS_NULLABLE');
 define('METADATA_FIELDNAME_KEY', 'COLUMN_KEY');
 define('METADATA_FIELDNAME_DEFAULT', 'COLUMN_DEFAULT');
 define('METADATA_FIELDNAME_EXTRA', 'EXTRA');
+define('METADATA_FIELDNAME_NUMERIC', 'IS_NUMERIC');
 
 
 
@@ -27,10 +28,10 @@ Class ClassTemplate {
     public $char_escapeNamePost = "";
     public $char_escapeValue = "'";
 
-    private $dataTypes_numeric=array('tinyint','smallint','mediumint', 'int','bigint','float','double','decimal');
+    private $dataTypes_numeric=array('tinyint','smallint','mediumint', 'int','bigint','float','double','decimal','numeric','money','smallmoney','real');
     private $dataTypes_boolean=array('bit');
     private $dataTypes_integer=array('tinyint','smallint','mediumint', 'int','bigint');
-    private $dataTypes_float=array('float','double','decimal');
+    private $dataTypes_float=array('float','double','decimal','real','numeric','money','smallmoney');
 
 
 
@@ -80,6 +81,11 @@ Class ClassTemplate {
         if (array_key_exists(METADATA_FIELDNAME_KEY,$column) && (strtoupper($column[METADATA_FIELDNAME_KEY])=='PRI' || strtoupper($column[METADATA_FIELDNAME_KEY])=='1')){
             $this->keyColumnIndexes[]= ($arraySize - 1) ;
         }
+
+        //Check to see if column is numeric
+        if (array_key_exists(METADATA_FIELDNAME_TYPE,$column)){
+            $this->columns[$arraySize - 1][METADATA_FIELDNAME_NUMERIC] = in_array(strtolower($column[METADATA_FIELDNAME_TYPE]),$this->dataTypes_numeric);
+        }
     }
 
 
@@ -89,7 +95,11 @@ Class ClassTemplate {
      * @param $allColumns
      */
     public function SetAllColumns($allColumns){
-        $this->columns=$allColumns;
+        //$this->columns=$allColumns;
+        unset($this->columns);
+        foreach ($allColumns as $column){
+            $this->AddColumn($column);
+        }
     }
 
 
@@ -136,13 +146,7 @@ Class {$this->table} EXTENDS Table  {
 
 {$this->GetDeclaration_Save()}
 
-{$this->GetDeclaration_AssocArray()}
-
-{$this->GetDeclaration_NumericArray()}
-
 {$this->GetDeclaration_ArrayOfFieldValues()}
-
-{$this->GetDeclaration_FilterAndEscape()}
 
 }
 CLASS_DECLARATION;
@@ -167,6 +171,7 @@ CLASS_DECLARATION;
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_KEY, 4);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_DEFAULT, 4);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_EXTRA, 4);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_NUMERIC, 4);
         $output .= PHP_EOL;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
@@ -179,6 +184,7 @@ CLASS_DECLARATION;
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_KEY], 4);
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_DEFAULT], 4);
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_EXTRA], 4);
+            $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_NUMERIC], 4);
             $output .= PHP_EOL;
         }
         $output .= PHP_EOL;
@@ -237,13 +243,13 @@ LOAD_DECLARATION;
     if (\$listOfFields=='*')
         \$listOfFields=\$this->allFieldNames;
        \$db = get_db_connection();
-       \$currentRecord_assoc = \$this->GetAssocArrayFromListOfFields(\$listOfFields);
-       \$currentRecord_numeric = \$this->GetNumericArrayFromListOfFields(\$listOfFields);
+       //\$currentRecord_numeric = \$this->GetNumericArrayFromListOfFields(\$listOfFields);
+       \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, \$this::ARRAY_TYPE_NUMERIC, false, false, true, true);
        if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
-            ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', array_keys(\$currentRecord_assoc)).'{$this->char_escapeNamePost})' .
+            ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', \$listOfFields ).'{$this->char_escapeNamePost})' .
             ' VALUES ('. str_repeat ( '?,' , count(\$listOfFields)-1) .'?) ';
-			\$rs = \$db->query(\$sql, null, null, array_keys(\$currentRecord_numeric));
+			\$rs = \$db->query(\$sql, null, null, \$currentRecord_numeric);
 			if (\$rs) {
 				\$this->$_fieldName = \$db->insertID();
 				return true;
@@ -252,7 +258,7 @@ LOAD_DECLARATION;
 			}
         }else{
             \$sql = 'UPDATE {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} SET ' .
-            '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', array_keys(\$currentRecord_assoc) ) . '{$this->char_escapeNamePost}=? ' .
+            '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', \$listOfFields ) . '{$this->char_escapeNamePost}=? ' .
 '   WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
         \$currentRecord_numeric[] = $_fieldValue;
         \$rs = \$db->query(\$sql, null, null, \$currentRecord_numeric);
@@ -312,6 +318,7 @@ COLUMN_IMPLOSION;
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_TYPE.'"=>\''. addslashes("{$field[METADATA_FIELDNAME_TYPE]}") . "'," , $widthInTabStops + 2);
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_NULL.'"=>\''."{$field[METADATA_FIELDNAME_NULL]}'," , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_KEY.'"=>\''."{$field[METADATA_FIELDNAME_KEY]}'," , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_NUMERIC.'"=>\''."{$field[METADATA_FIELDNAME_NUMERIC]}'," , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>' . $filterTypeNum . ',' , $widthInTabStops + 4);
             $thisValue .= $this->ColumnifyString('"BoolQuoteWhenPopulating"=>' . $boolQuoteWhenPopulating . ')' . $comma , $widthInTabStops)  . PHP_EOL;
             $template .= '			' . $thisField . $thisValue ;
@@ -325,72 +332,14 @@ COLUMN_IMPLOSION;
     }
 
 
-
-
-
-    /**
-     * @return string
-     */
-    public function GetDeclaration_AssocArray(){
-        return
-<<<ASSOC_ARRAY
-    public function GetAssocArrayFromListOfFields(\$listOfFields = "*", \$excludeEmpties = false)
-    {
-    if (\$listOfFields=='*')
-        \$listOfFields=\$this->allFieldNames;
-    \$result = array();
-    foreach (\$listOfFields as \$fieldName) {
-        if (property_exists(\$this, \$fieldName)) {
-            \$filteredResult = \$this->FilterAndEscapeField(\$fieldName);
-            \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$this::CHAR_ESCAPE_FIELD_VALUE . \$this::CHAR_ESCAPE_FIELD_VALUE;
-            if (!\$boolIsAnEmpty || !\$excludeEmpties)
-                \$result[\$fieldName] = \$filteredResult;
-            }
-        }
-        return \$result;
-    }
-ASSOC_ARRAY;
-    }
-
-
-
-
-
-    /**
-     * @return string
-     */
-    public function GetDeclaration_NumericArray(){
-
-        return
-<<<ASSOC_ARRAY
-    public function GetNumericArrayFromListOfFields(\$listOfFields = "*", \$excludeEmpties = false)
-    {
-    if (\$listOfFields=='*')
-        \$listOfFields=\$this->allFieldNames;
-    \$result = array();
-    foreach (\$listOfFields as \$myIndex=>\$fieldName) {
-        if (property_exists(\$this, \$fieldName)) {
-            \$filteredResult = \$this->FilterAndEscapeField(\$fieldName);
-            \$boolIsAnEmpty = !isset(\$filteredResult) || \$filteredResult == '' || \$filteredResult == \$this::CHAR_ESCAPE_FIELD_VALUE . \$this::CHAR_ESCAPE_FIELD_VALUE;
-            if (!\$boolIsAnEmpty || !\$excludeEmpties)
-                \$result[\$myIndex] = \$filteredResult;
-            }
-        }
-        return \$result;
-    }
-ASSOC_ARRAY;
-    }
-
-    
-    
     public function GetDeclaration_ArrayOfFieldValues(){
         return <<<ARRAY_DECLARATION
 	public function GetArrayOfFieldValues(\$listOfFields='*', \$arrayType=$this->table::ARRAY_TYPE_ASSOC, \$boolUseSanitizeFilters=false, \$boolEncapsulateInQuotes=false, \$boolIncludeEmpties=true, \$boolIncludeNulls=true){
 		if (\$listOfFields=='*')
 			\$listOfFields=\$this->allFieldNames;
-
         \$tableMeta=\$this->GetTableMetaAsAssocArray();
 		\$result = array();
+        \$i = -1;
 		foreach (\$listOfFields as \$myIndex=>\$fieldName) {
 			if (property_exists(\$this, \$fieldName)) {
 				\$myValue=\$this->\$fieldName;
@@ -398,78 +347,23 @@ ASSOC_ARRAY;
 				\$boolIsNull = is_null(\$myValue);
 				\$boolIsEmpty = ( isset(\$myValue) && empty(\$myValue) ) && ( \$myValue !== FALSE && \$myValue !== 0 && \$myValue !== 0.0 && \$myValue !== array() );
 				\$boolExcludeMe = (!\$boolIncludeEmpties && \$boolIsEmpty) || (!\$boolIncludeNulls && \$boolIsNull);
-				\$i = -1;
 				if(!\$boolExcludeMe){
 					\$i++;
 					if(\$arrayType==\$this::ARRAY_TYPE_ASSOC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
-						echo \$result[\$fieldName]='parent::ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes)';
+						\$result[\$fieldName]=\$this->ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes);
 					}
 					if(\$arrayType==\$this::ARRAY_TYPE_NUMERIC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
-						echo \$result[\$i]='parent::ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes)';
+						\$result[\$i]=\$this->ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes);
 					}
 				}
 			}
 		}
+		return \$result;
 	}
 ARRAY_DECLARATION;
 
     }
     
-    
-    
-    
-    
-    /**
-     * @return string
-     */
-    public function GetDeclaration_FilterAndEscape(){
-        $metaFieldNull = METADATA_FIELDNAME_NULL;
-        return <<<FILTER_FUNCTION
-    public function FilterAndEscapeField(\$fieldName){
-        if(property_exists(\$this,\$fieldName)){
-            \$tableMeta = \$this->GetTableMetaAsAssocArray();
-
-            \$filterType = \$tableMeta[\$fieldName]['FilterTypeNum'];
-            \$boolAllowsNull = \$tableMeta[\$fieldName]['$metaFieldNull'] == 'YES' ? true : false ;
-            \$boolRequiresEscape = \$tableMeta[\$fieldName]['BoolQuoteWhenPopulating'];
-
-            \$escapeChar = \$boolRequiresEscape ? \$this::CHAR_ESCAPE_FIELD_VALUE : "";
-
-            \$fieldValue = \$this->\$fieldName;
-            \$returnValue = '';
-
-            switch(\$filterType){
-                case \$this::FILTER_TYPE_STRING:
-                    \$returnValue = filter_var(\$fieldValue,FILTER_SANITIZE_STRING);
-                    break;
-
-                case \$this::FILTER_TYPE_INT:
-                    \$returnValue =  filter_var(\$fieldValue,FILTER_SANITIZE_NUMBER_INT);
-                    break;
-
-                case \$this::FILTER_TYPE_FLOAT:
-                    \$returnValue =  filter_var(\$fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
-                    break;
-
-                case \$this::FILTER_TYPE_BOOL:
-                    \$returnValue =  boolval(\$fieldValue) ? 1 : 0 ;
-                    break;
-            }
-
-            \$returnValue = \$escapeChar.\$returnValue.\$escapeChar ;
-            if ( (\$returnValue=='' || \$returnValue == \$escapeChar.\$escapeChar) && \$boolAllowsNull) {
-                return \$escapeChar . NULL . \$escapeChar;
-            }
-            elseif ( (\$returnValue=='' || \$returnValue == \$escapeChar.\$escapeChar) && \$boolAllowsNull){
-                return false;
-            }
-            else return \$returnValue;
-        }
-    }
-FILTER_FUNCTION;
-
-    }
-
 
     /**
      * @param $myString
