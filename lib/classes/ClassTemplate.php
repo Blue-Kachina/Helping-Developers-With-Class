@@ -349,7 +349,6 @@ COLUMN_IMPLOSION;
         $keyColumns = "'" . implode('\',\'' , $this->keyColumnNames) . "'";
         return <<<ARRAY_DECLARATION
 	public function GetArrayOfFieldValues(\$listOfFields='*', \$arrayType=$this->table::ARRAY_TYPE_ASSOC, \$boolUseSanitizeFilters=false, \$boolEncapsulateInQuotes=false, \$boolIncludeEmpties=true, \$boolIncludeNulls=true){
-	    \$keyColumns=array($keyColumns);
 		if (\$listOfFields=='*')
 			\$listOfFields=\$this->allFieldsWithoutKeys;
         \$tableMeta=\$this->GetTableMetaAsAssocArray();
