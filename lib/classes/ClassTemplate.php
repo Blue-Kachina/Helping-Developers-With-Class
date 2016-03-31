@@ -360,7 +360,7 @@ COLUMN_IMPLOSION;
                 \$myMeta=\$tableMeta[\$fieldName];
 				\$boolIsNull = is_null(\$myValue);
 				\$boolIsEmpty = ( isset(\$myValue) && empty(\$myValue) ) && ( \$myValue !== FALSE && \$myValue !== 0 && \$myValue !== 0.0 && \$myValue !== array() );
-				\$boolExcludeMe = (!\$boolIncludeEmpties && \$boolIsEmpty) || (!\$boolIncludeNulls && \$boolIsNull) || in_array(\$fieldName,\$keyColumns);
+				\$boolExcludeMe = (!\$boolIncludeEmpties && \$boolIsEmpty) || (!\$boolIncludeNulls && \$boolIsNull);
 				if(!\$boolExcludeMe){
 					\$i++;
 					if(\$arrayType==\$this::ARRAY_TYPE_ASSOC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
