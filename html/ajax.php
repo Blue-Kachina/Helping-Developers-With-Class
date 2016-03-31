@@ -93,7 +93,7 @@ switch ($_POST['action']) {
         $result = $connection->ReturnColumnData();
         //var_dump($result);
             if ($result) {
-                $template = new ClassTemplate($tableName, $result, "SQL Server");
+                $template = new ClassTemplate($tableName, $result, "MSSQL");
                 $template->SetAllColumns($result);
                 $class_members = $template->GetDeclaration_Members();
                 $class_load = $template->GetDeclaration_Load();

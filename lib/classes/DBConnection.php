@@ -53,7 +53,7 @@ Class DB_Connection {
             }
 
         //SQL Server
-        } elseif ($this->type == "SQL Server") {
+        } elseif ($this->type == "MSSQL") {
             $connectionInfo = array( "Database"=>$this->database, "UID"=>$this->username, "PWD"=>$this->password);
             $this->connection = sqlsrv_connect($this->address, $connectionInfo);
             if (!$this->connection) {
@@ -101,7 +101,7 @@ Class DB_Connection {
         elseif($this->type=="MySQL"){
             $allTables = $this->ReturnTableNames_MySQL();
         }
-        elseif($this->type="SQL Server"){
+        elseif($this->type="MSSQL"){
             $allTables = $this->ReturnTableNames_SQL_Server();
         }
 
@@ -132,7 +132,7 @@ Class DB_Connection {
 
             } else return false;
         }
-        elseif($this->type == "SQL Server")
+        elseif($this->type == "MSSQL")
         {
             $tableName = filter_var($this->table, FILTER_SANITIZE_STRING);
             $columnList=array();

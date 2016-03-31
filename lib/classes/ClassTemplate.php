@@ -22,6 +22,7 @@ Class ClassTemplate {
     private $table;
     private $columns = array();
     private $keyColumnIndexes = array();
+    private $keyColumnNames = array();
     private $dbType;
 
     public $char_escapeNamePre = "";
@@ -51,7 +52,7 @@ Class ClassTemplate {
             $this->char_escapeNamePost ="`";
             $this->char_escapeValue = "'";
         }
-        elseif($this->dbType=="SQL Server"){
+        elseif($this->dbType=="MSSQL"){
             $this->char_escapeNamePre ="[";
             $this->char_escapeNamePost ="]";
             $this->char_escapeValue = "'";
@@ -80,6 +81,7 @@ Class ClassTemplate {
         //Add the column to keyColumnIndexes when applicable
         if (array_key_exists(METADATA_FIELDNAME_KEY,$column) && (strtoupper($column[METADATA_FIELDNAME_KEY])=='PRI' || strtoupper($column[METADATA_FIELDNAME_KEY])=='1')){
             $this->keyColumnIndexes[]= ($arraySize - 1) ;
+            $this->keyColumnNames[]= ($column[METADATA_FIELDNAME_FIELD]) ;
         }
 
         //Check to see if column is numeric
@@ -148,6 +150,8 @@ Class {$this->table} EXTENDS Table  {
 
 {$this->GetDeclaration_ArrayOfFieldValues()}
 
+{$this->GetDeclaration_ReturnFormattedData()}
+
 }
 CLASS_DECLARATION;
     }
@@ -161,6 +165,14 @@ CLASS_DECLARATION;
      * @return string
      */
     public function GetDeclaration_Members(){
+
+        $fieldsWithoutKeys = array();
+        foreach($this->columns as $thisColumn){
+            if(!in_array($thisColumn[METADATA_FIELDNAME_FIELD],$this->keyColumnNames)){
+                $fieldsWithoutKeys[]=$thisColumn[METADATA_FIELDNAME_FIELD];
+            }
+        }
+
         $widthInTabStops = 10;
 
         //Template the member declaration column headers
@@ -189,6 +201,7 @@ CLASS_DECLARATION;
         }
         $output .= PHP_EOL;
         $output .= '    public $allFieldNames = array(\'' . implode('\', \'', array_column($this->columns, METADATA_FIELDNAME_FIELD)) . '\');' . PHP_EOL;
+        $output .= '    public $allFieldsWithoutKeys = array(\'' . implode('\', \'', $fieldsWithoutKeys) . '\');' . PHP_EOL;
         $output .= PHP_EOL;
 
         //A message to alert developers who might use this class.  Any non-field related properties that they might add to this class should be added the following comment.  Doing so will allow for easy updates to this class using this utility at a later time
@@ -241,7 +254,7 @@ LOAD_DECLARATION;
 <<<COLUMN_IMPLOSION
     public function save(\$listOfFields = "*") {
     if (\$listOfFields=='*')
-        \$listOfFields=\$this->allFieldNames;
+        \$listOfFields=\$this->allFieldsWithoutKeys;
        \$db = get_db_connection();
        //\$currentRecord_numeric = \$this->GetNumericArrayFromListOfFields(\$listOfFields);
        \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, \$this::ARRAY_TYPE_NUMERIC, false, false, true, true);
@@ -333,10 +346,12 @@ COLUMN_IMPLOSION;
 
 
     public function GetDeclaration_ArrayOfFieldValues(){
+        $keyColumns = "'" . implode('\',\'' , $this->keyColumnNames) . "'";
         return <<<ARRAY_DECLARATION
 	public function GetArrayOfFieldValues(\$listOfFields='*', \$arrayType=$this->table::ARRAY_TYPE_ASSOC, \$boolUseSanitizeFilters=false, \$boolEncapsulateInQuotes=false, \$boolIncludeEmpties=true, \$boolIncludeNulls=true){
+	    \$keyColumns=array($keyColumns);
 		if (\$listOfFields=='*')
-			\$listOfFields=\$this->allFieldNames;
+			\$listOfFields=\$this->allFieldsWithoutKeys;
         \$tableMeta=\$this->GetTableMetaAsAssocArray();
 		\$result = array();
         \$i = -1;
@@ -346,14 +361,14 @@ COLUMN_IMPLOSION;
                 \$myMeta=\$tableMeta[\$fieldName];
 				\$boolIsNull = is_null(\$myValue);
 				\$boolIsEmpty = ( isset(\$myValue) && empty(\$myValue) ) && ( \$myValue !== FALSE && \$myValue !== 0 && \$myValue !== 0.0 && \$myValue !== array() );
-				\$boolExcludeMe = (!\$boolIncludeEmpties && \$boolIsEmpty) || (!\$boolIncludeNulls && \$boolIsNull);
+				\$boolExcludeMe = (!\$boolIncludeEmpties && \$boolIsEmpty) || (!\$boolIncludeNulls && \$boolIsNull) || in_array(\$fieldName,\$keyColumns);
 				if(!\$boolExcludeMe){
 					\$i++;
 					if(\$arrayType==\$this::ARRAY_TYPE_ASSOC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
-						\$result[\$fieldName]=\$this->ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes);
+						\$result[\$fieldName]=\$this->ReturnFormattedData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes);
 					}
 					if(\$arrayType==\$this::ARRAY_TYPE_NUMERIC || \$arrayType==\$this::ARRAY_TYPE_BOTH){
-						\$result[\$i]=\$this->ManipulateData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes);
+						\$result[\$i]=\$this->ReturnFormattedData(\$myValue,\$myMeta,\$boolUseSanitizeFilters,\$boolEncapsulateInQuotes);
 					}
 				}
 			}
@@ -363,7 +378,50 @@ COLUMN_IMPLOSION;
 ARRAY_DECLARATION;
 
     }
-    
+
+
+    public function GetDeclaration_ReturnFormattedData(){
+        return <<<'FORMAT_DATA'
+	private function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
+
+            $filterType = $fieldMeta['FilterTypeNum'];
+            $boolAllowsNull = in_array($fieldMeta['IS_NULLABLE'], array('YES',1,true)) ? true : false ;
+            $boolRequiresEscape = $fieldMeta['BoolQuoteWhenPopulating'];
+			$boolIsNumeric = $fieldMeta['IS_NUMERIC'];
+
+            $escapeChar = ($boolRequiresEscape && $boolEncapsulateInQuotes) ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
+
+            $fieldValue = $data;
+
+
+			if($boolSanitize){
+				switch($filterType){
+					case $this::FILTER_TYPE_STRING:
+						$fieldValue = filter_var($fieldValue,FILTER_SANITIZE_STRING);
+						break;
+
+					case $this::FILTER_TYPE_INT:
+						$fieldValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_INT);
+						break;
+
+					case $this::FILTER_TYPE_FLOAT:
+						$fieldValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
+						break;
+
+					case $this::FILTER_TYPE_BOOL:
+						$fieldValue =  boolval($fieldValue) ? 1 : 0 ;
+						break;
+				}
+			}
+
+			$fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? null : $fieldValue;
+            $fieldValue = $escapeChar.$fieldValue.$escapeChar ;
+            return $fieldValue;
+    }
+FORMAT_DATA;
+
+    }
+
 
     /**
      * @param $myString

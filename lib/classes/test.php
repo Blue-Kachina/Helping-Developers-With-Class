@@ -2,11 +2,11 @@
 /**
  * Created by "Helping Developers With Class".
  * User: WEBDEV$
- * Timestamp: March 26, 2016, 12:51 pm
+ * Timestamp: March 31, 2016, 8:39 am
  */
-require_once('Table.php');
+require_once(DIR_ROOT . '/lib/classes/tables/Table.php');
 
-Class Activity EXTENDS Table  {
+Class People EXTENDS Table  {
 
     const FILTER_TYPE_NONE = 0;
     const FILTER_TYPE_BOOL = 1;
@@ -14,29 +14,27 @@ Class Activity EXTENDS Table  {
     const FILTER_TYPE_FLOAT = 3;
     const FILTER_TYPE_STRING = 4;
 
+    const ARRAY_TYPE_NUMERIC = 1;
+    const ARRAY_TYPE_ASSOC = 2;
+    const ARRAY_TYPE_BOTH = 3;
+
     const CHAR_ESCAPE_FIELD_VALUE = "'" ;
     const CHAR_ESCAPE_FIELD_NAME_PRE = "[";
     const CHAR_ESCAPE_FIELD_NAME_POST = "]";
 
 
-//          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA
+//          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA			IS_NUMERIC
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public $activity_p;					//int									0				1
-    public $activityName;				//nvarchar								1				0
-    public $activityNumber;				//nvarchar								1				0
-    public $status;						//nvarchar								1				0
-    public $projectID_f;				//int									1				0
-    public $element_num;				//int									1				0
-    public $plan_start_date;			//date									1				0
-    public $plannedhours;				//float									1				0
-    public $phase_name;					//nvarchar								1				0
-    public $zkRecord_No;				//nvarchar								1				0
-    public $za_endDate_display;			//date									1				0
-    public $type;						//nvarchar								1				0
-    public $rate;						//float									1				0
-    public $percent_complete;			//float									1				0
-    public $billableOrNonBillable;		//nvarchar								1				0
-    public $planned_hours_remaining;	//float									1				0
+    public $person_p;					//int									0				1												1
+    public $std_dateTime2_create;		//datetime2								0				0
+    public $std_dateTime2_modify;		//datetime2								1				0
+    public $nameFirst;					//varchar								1				0
+    public $nameLast;					//varchar								1				0
+    public $boolIsCustomer;				//bit									1				0
+    public $age;						//tinyint								1				0												1
+
+    public $allFieldNames = array('person_p', 'std_dateTime2_create', 'std_dateTime2_modify', 'nameFirst', 'nameLast', 'boolIsCustomer', 'age');
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //If you create any properties that aren't associated with a field from this table, please define them underneath this line
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,31 +42,22 @@ Class Activity EXTENDS Table  {
 
     private function GetTableMetaAsAssocArray(){
         $record = array(
-            'activity_p'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'0',				"COLUMN_KEY"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0),
-            'activityName'=>				array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'activityNumber'=>				array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'status'=>						array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'projectID_f'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0),
-            'element_num'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0),
-            'plan_start_date'=>				array(		"DATA_TYPE"=>'date',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'plannedhours'=>				array(		"DATA_TYPE"=>'float',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_FLOAT,		"BoolQuoteWhenPopulating"=>0),
-            'phase_name'=>					array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'zkRecord_No'=>					array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'za_endDate_display'=>			array(		"DATA_TYPE"=>'date',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'type'=>						array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'rate'=>						array(		"DATA_TYPE"=>'float',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_FLOAT,		"BoolQuoteWhenPopulating"=>0),
-            'percent_complete'=>			array(		"DATA_TYPE"=>'float',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_FLOAT,		"BoolQuoteWhenPopulating"=>0),
-            'billableOrNonBillable'=>		array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'planned_hours_remaining'=>		array(		"DATA_TYPE"=>'float',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"FilterTypeNum"=>$this::FILTER_TYPE_FLOAT,		"BoolQuoteWhenPopulating"=>0)
+            'person_p'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'0',				"COLUMN_KEY"=>'1',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0),
+            'std_dateTime2_create'=>		array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>'0',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
+            'std_dateTime2_modify'=>		array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
+            'nameFirst'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
+            'nameLast'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
+            'boolIsCustomer'=>				array(		"DATA_TYPE"=>'bit',						"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_BOOL,		"BoolQuoteWhenPopulating"=>1),
+            'age'=>							array(		"DATA_TYPE"=>'tinyint',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0)
         );
         return $record;
     }
 
 
-    public function load($param_activity_p) {
+    public function load($param_person_p) {
         $db = get_db_connection();
-        $sql = 'SELECT * FROM `Activity` WHERE `activity_p` = ?';
-        $rs = $db->query($sql, null, null, array($param_activity_p));
+        $sql = 'SELECT * FROM [People] WHERE [person_p] = ?';
+        $rs = $db->query($sql, null, null, array($param_person_p));
 
         if($rs && $rs->rowCount() > 0) {
             $row = $rs->fetch(CoreDB::FETCH_ASSOC);
@@ -78,27 +67,29 @@ Class Activity EXTENDS Table  {
 
     public function save($listOfFields = "*") {
         if ($listOfFields=='*')
-            $listOfFields=array('activity_p', 'activityName', 'activityNumber', 'status', 'projectID_f', 'element_num', 'plan_start_date', 'plannedhours', 'phase_name', 'zkRecord_No', 'za_endDate_display', 'type', 'rate', 'percent_complete', 'billableOrNonBillable', 'planned_hours_remaining');
+            $listOfFields=$this->allFieldNames;
         $db = get_db_connection();
-        $currentRecord = $this->GetAssocArrayFromListOfFields($listOfFields);
-        if (empty($this->activity_p)) {
-            $sql = 'INSERT INTO `Activity`'.
-                ' (`'.implode('`, `', array_keys($currentRecord)).'`)' .
-                ' VALUES ('.implode(', ', $currentRecord).') ';
-            $rs = $db->query($sql, null, null, array_keys($currentRecord));
+        //$currentRecord_numeric = $this->GetNumericArrayFromListOfFields($listOfFields);
+        $currentRecord_numeric = $this->GetArrayOfFieldValues($listOfFields, $this::ARRAY_TYPE_NUMERIC, false, false, true, true);
+        if (empty($this->person_p)) {
+            $sql = 'INSERT INTO [People]'.
+                ' (['.implode('], [', $listOfFields ).'])' .
+                ' VALUES ('. str_repeat ( '?,' , count($listOfFields)-1) .'?) ';
+            $rs = $db->query($sql, null, null, $currentRecord_numeric);
             if ($rs) {
-                $this->activity_p = $db->insertID();
+                $this->person_p = $db->insertID();
                 return true;
             } else {
                 return false;
             }
         }else{
-            $sql = 'UPDATE `Activity` SET ' .
-                '`'.implode('`, `', array_keys($currentRecord)) . '` = ?' .
-                '   WHERE `activity_p` = ?';
-            $rs = $db->query($sql, null, null, $currentRecord);
+            $sql = 'UPDATE [People] SET ' .
+                '['.implode(']=?, [', $listOfFields ) . ']=? ' .
+                '   WHERE [person_p] = ?';
+            $currentRecord_numeric[] = $this->person_p;
+            $rs = $db->query($sql, null, null, $currentRecord_numeric);
             if ($rs) {
-                $this->activity_p =  $db->insertID();
+                $this->person_p =  $db->insertID();
                 return true;
             } else {
                 return false;
@@ -106,62 +97,68 @@ Class Activity EXTENDS Table  {
         }
     }
 
-    public function GetAssocArrayFromListOfFields($listOfFields = "*", $excludeEmpties = false)
-    {
+    public function GetArrayOfFieldValues($listOfFields='*', $arrayType=People::ARRAY_TYPE_ASSOC, $boolUseSanitizeFilters=false, $boolEncapsulateInQuotes=false, $boolIncludeEmpties=true, $boolIncludeNulls=true){
         if ($listOfFields=='*')
-            $listOfFields=array('activity_p', 'activityName', 'activityNumber', 'status', 'projectID_f', 'element_num', 'plan_start_date', 'plannedhours', 'phase_name', 'zkRecord_No', 'za_endDate_display', 'type', 'rate', 'percent_complete', 'billableOrNonBillable', 'planned_hours_remaining');
+            $listOfFields=$this->allFieldNames;
+        $tableMeta=$this->GetTableMetaAsAssocArray();
         $result = array();
-        foreach ($listOfFields as $fieldName) {
+        $i = -1;
+        foreach ($listOfFields as $myIndex=>$fieldName) {
             if (property_exists($this, $fieldName)) {
-                $filteredResult = $this->FilterAndEscapeField($fieldName);
-                $boolIsAnEmpty = !isset($filteredResult) || $filteredResult == '' || $filteredResult == $this::CHAR_ESCAPE_FIELD_VALUE . $this::CHAR_ESCAPE_FIELD_VALUE;
-                if (!$boolIsAnEmpty || !$excludeEmpties)
-                    $result[$fieldName] = $filteredResult;
+                $myValue=$this->$fieldName;
+                $myMeta=$tableMeta[$fieldName];
+                $boolIsNull = is_null($myValue);
+                $boolIsEmpty = ( isset($myValue) && empty($myValue) ) && ( $myValue !== FALSE && $myValue !== 0 && $myValue !== 0.0 && $myValue !== array() );
+                $boolExcludeMe = (!$boolIncludeEmpties && $boolIsEmpty) || (!$boolIncludeNulls && $boolIsNull);
+                if(!$boolExcludeMe){
+                    $i++;
+                    if($arrayType==$this::ARRAY_TYPE_ASSOC || $arrayType==$this::ARRAY_TYPE_BOTH){
+                        $result[$fieldName]=$this->ReturnFormattedData($myValue,$myMeta,$boolUseSanitizeFilters,$boolEncapsulateInQuotes);
+                    }
+                    if($arrayType==$this::ARRAY_TYPE_NUMERIC || $arrayType==$this::ARRAY_TYPE_BOTH){
+                        $result[$i]=$this->ReturnFormattedData($myValue,$myMeta,$boolUseSanitizeFilters,$boolEncapsulateInQuotes);
+                    }
+                }
             }
         }
         return $result;
     }
 
-    public function FilterAndEscapeField($fieldName){
-        if(property_exists($this,$fieldName)){
-            $tableMeta = $this->GetTableMetaAsAssocArray();
+    private function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
 
-            $filterType = $tableMeta[$fieldName]['FilterTypeNum'];
-            $boolAllowsNull = $tableMeta[$fieldName]['IS_NULLABLE'] == 'YES' ? true : false ;
-            $boolRequiresEscape = $tableMeta[$fieldName]['BoolQuoteWhenPopulating'];
+        $filterType = $fieldMeta['FilterTypeNum'];
+        $boolAllowsNull = in_array($fieldMeta['IS_NULLABLE'], array('YES',1,true)) ? true : false ;
+        $boolRequiresEscape = $fieldMeta['BoolQuoteWhenPopulating'];
+        $boolIsNumeric = $fieldMeta['IS_NUMERIC'];
 
-            $escapeChar = $boolRequiresEscape ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
+        $escapeChar = ($boolRequiresEscape && $boolEncapsulateInQuotes) ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
 
-            $fieldValue = $this->$fieldName;
-            $returnValue = '';
+        $fieldValue = $data;
 
+
+        if($boolSanitize){
             switch($filterType){
                 case $this::FILTER_TYPE_STRING:
-                    $returnValue = filter_var($fieldValue,FILTER_SANITIZE_STRING);
+                    $fieldValue = filter_var($fieldValue,FILTER_SANITIZE_STRING);
                     break;
 
                 case $this::FILTER_TYPE_INT:
-                    $returnValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_INT);
+                    $fieldValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_INT);
                     break;
 
                 case $this::FILTER_TYPE_FLOAT:
-                    $returnValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
+                    $fieldValue =  filter_var($fieldValue,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
                     break;
 
                 case $this::FILTER_TYPE_BOOL:
-                    $returnValue =  boolval($fieldValue) ? 1 : 0 ;
+                    $fieldValue =  boolval($fieldValue) ? 1 : 0 ;
                     break;
             }
-
-            $returnValue = $escapeChar.$returnValue.$escapeChar ;
-            if ( ($returnValue=='' || $returnValue == $escapeChar.$escapeChar) && $boolAllowsNull) {
-                return $escapeChar . NULL . $escapeChar;
-            }
-            elseif ( ($returnValue=='' || $returnValue == $escapeChar.$escapeChar) && $boolAllowsNull){
-                return false;
-            }
-            else return $returnValue;
         }
+
+        $returnValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? null : $fieldValue;
+        $returnValue = $escapeChar.$fieldValue.$escapeChar ;
+        return $fieldValue;
     }
 
 }
