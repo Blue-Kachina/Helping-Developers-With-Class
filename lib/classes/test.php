@@ -1,12 +1,12 @@
 <?php
 /**
  * Created by "Helping Developers With Class".
- * User: WEBDEV$
- * Timestamp: March 31, 2016, 8:39 am
+ * User: BADASSDESKTOP$
+ * Timestamp: September 20, 2016, 11:47 pm
  */
 require_once(DIR_ROOT . '/lib/classes/tables/Table.php');
 
-Class People EXTENDS Table  {
+Class Log EXTENDS Table  {
 
     const FILTER_TYPE_NONE = 0;
     const FILTER_TYPE_BOOL = 1;
@@ -19,45 +19,62 @@ Class People EXTENDS Table  {
     const ARRAY_TYPE_BOTH = 3;
 
     const CHAR_ESCAPE_FIELD_VALUE = "'" ;
-    const CHAR_ESCAPE_FIELD_NAME_PRE = "[";
-    const CHAR_ESCAPE_FIELD_NAME_POST = "]";
+    const CHAR_ESCAPE_FIELD_NAME_PRE = "`";
+    const CHAR_ESCAPE_FIELD_NAME_POST = "`";
 
 
-//          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA			IS_NUMERIC
+//          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA			IS_NUMERIC		BOUND_PARAM_TYPE
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public $person_p;					//int									0				1												1
-    public $std_dateTime2_create;		//datetime2								0				0
-    public $std_dateTime2_modify;		//datetime2								1				0
-    public $nameFirst;					//varchar								1				0
-    public $nameLast;					//varchar								1				0
-    public $boolIsCustomer;				//bit									1				0
-    public $age;						//tinyint								1				0												1
+    public $LogID;						//int									NO				PRI								auto_increment	1				i				
+    public $DateTimeEvent;				//datetime								YES																				s				
+    public $LogType;					//varchar								YES																				s				
+    public $ActivityType;				//varchar								YES																				s				
+    public $UserEnter;					//int									YES																1				i				
+    public $Message;					//text									YES																				s				
+    public $ipAddress;					//varchar								YES																				s				
+    public $TankID;						//int									YES																1				i				
+    public $TankRef;					//varchar								YES																				s				
+    public $Entity;						//varchar								YES																				s				
+    public $DataOwner;					//varchar								YES																				s				
 
-    public $allFieldNames = array('person_p', 'std_dateTime2_create', 'std_dateTime2_modify', 'nameFirst', 'nameLast', 'boolIsCustomer', 'age');
+    public $allFieldNames = array('LogID', 'DateTimeEvent', 'LogType', 'ActivityType', 'UserEnter', 'Message', 'ipAddress', 'TankID', 'TankRef', 'Entity', 'DataOwner');
+    public $allFieldsWithoutKeys = array('DateTimeEvent', 'LogType', 'ActivityType', 'UserEnter', 'Message', 'ipAddress', 'TankID', 'TankRef', 'Entity', 'DataOwner');
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //If you create any properties that aren't associated with a field from this table, please define them underneath this line
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+    /**
+     * Returns an associative array containing metadata about the fields in the table that this class describes
+     * @return array
+     */
     private function GetTableMetaAsAssocArray(){
         $record = array(
-            'person_p'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'0',				"COLUMN_KEY"=>'1',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0),
-            'std_dateTime2_create'=>		array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>'0',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'std_dateTime2_modify'=>		array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'nameFirst'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'nameLast'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1),
-            'boolIsCustomer'=>				array(		"DATA_TYPE"=>'bit',						"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_BOOL,		"BoolQuoteWhenPopulating"=>1),
-            'age'=>							array(		"DATA_TYPE"=>'tinyint',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0)
+            'LogID'=>						array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'NO',			"COLUMN_KEY"=>'PRI',			"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
+            'DateTimeEvent'=>				array(		"DATA_TYPE"=>'datetime',				"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'LogType'=>						array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'ActivityType'=>				array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'UserEnter'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
+            'Message'=>						array(		"DATA_TYPE"=>'text',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'ipAddress'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'TankID'=>						array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
+            'TankRef'=>						array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'Entity'=>						array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'DataOwner'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s')
         );
         return $record;
     }
 
 
-    public function load($param_person_p) {
+    /**
+     * Will attempt to load up all of this class' members based on the primary key parameter specified
+     * @param LogID
+     */
+    public function load($param_LogID) {
         $db = get_db_connection();
-        $sql = 'SELECT * FROM [People] WHERE [person_p] = ?';
-        $rs = $db->query($sql, null, null, array($param_person_p));
+        $sql = 'SELECT * FROM `Log` WHERE `LogID` = ?';
+        $rs = $db->query($sql, null, null, array($param_LogID));
 
         if($rs && $rs->rowCount() > 0) {
             $row = $rs->fetch(CoreDB::FETCH_ASSOC);
@@ -65,31 +82,39 @@ Class People EXTENDS Table  {
         }
     }
 
+    /**
+     * Will attempt to save the current record
+     * An INSERT will be performed if the primary key for $this is not already populated
+     * An UPDATE will be performed otherwise
+     * Various options are available within the function (sanitize,quote,includeEmpties,includeNulls)
+     * @param string $listOfFields --> determines which fields are to be saved
+     * @return bool
+     */
     public function save($listOfFields = "*") {
         if ($listOfFields=='*')
-            $listOfFields=$this->allFieldNames;
+            $listOfFields=$this->allFieldsWithoutKeys;
         $db = get_db_connection();
-        //$currentRecord_numeric = $this->GetNumericArrayFromListOfFields($listOfFields);
         $currentRecord_numeric = $this->GetArrayOfFieldValues($listOfFields, $this::ARRAY_TYPE_NUMERIC, false, false, true, true);
-        if (empty($this->person_p)) {
-            $sql = 'INSERT INTO [People]'.
-                ' (['.implode('], [', $listOfFields ).'])' .
+        $currentRecord_numeric = array_unshift($currentRecord_numeric,$this->GetBoundParamTypeString($listOfFields));
+        if (empty($this->LogID)) {
+            $sql = 'INSERT INTO `Log`'.
+                ' (`'.implode('`, `', $listOfFields ).'`)' .
                 ' VALUES ('. str_repeat ( '?,' , count($listOfFields)-1) .'?) ';
             $rs = $db->query($sql, null, null, $currentRecord_numeric);
             if ($rs) {
-                $this->person_p = $db->insertID();
+                $this->LogID = $db->insertID();
                 return true;
             } else {
                 return false;
             }
         }else{
-            $sql = 'UPDATE [People] SET ' .
-                '['.implode(']=?, [', $listOfFields ) . ']=? ' .
-                '   WHERE [person_p] = ?';
-            $currentRecord_numeric[] = $this->person_p;
+            $sql = 'UPDATE `Log` SET ' .
+                '`'.implode('`=?, `', $listOfFields ) . '`=? ' .
+                '   WHERE `LogID` = ?';
+            $currentRecord_numeric[] = $this->LogID;
             $rs = $db->query($sql, null, null, $currentRecord_numeric);
             if ($rs) {
-                $this->person_p =  $db->insertID();
+                $this->LogID =  $db->insertID();
                 return true;
             } else {
                 return false;
@@ -97,9 +122,21 @@ Class People EXTENDS Table  {
         }
     }
 
-    public function GetArrayOfFieldValues($listOfFields='*', $arrayType=People::ARRAY_TYPE_ASSOC, $boolUseSanitizeFilters=false, $boolEncapsulateInQuotes=false, $boolIncludeEmpties=true, $boolIncludeNulls=true){
+    /**
+     * This function is primarily only invoked privately
+     * Its primary purpose is to return a list of values when given a list of field names
+     * It contains a number of options that can be set via parameters
+     * @param string $listOfFields
+     * @param int $arrayType
+     * @param bool $boolUseSanitizeFilters
+     * @param bool $boolEncapsulateInQuotes
+     * @param bool $boolIncludeEmpties
+     * @param bool $boolIncludeNulls
+     * @return array
+     */
+    public function GetArrayOfFieldValues($listOfFields='*', $arrayType=Log::ARRAY_TYPE_ASSOC, $boolUseSanitizeFilters=false, $boolEncapsulateInQuotes=false, $boolIncludeEmpties=true, $boolIncludeNulls=true){
         if ($listOfFields=='*')
-            $listOfFields=$this->allFieldNames;
+            $listOfFields=$this->allFieldsWithoutKeys;
         $tableMeta=$this->GetTableMetaAsAssocArray();
         $result = array();
         $i = -1;
@@ -124,6 +161,36 @@ Class People EXTENDS Table  {
         return $result;
     }
 
+    /**
+     * This function is to be used when a MySQL database is the source of data
+     * It returns bound parameter types to be used to virtually accomplish parameterized querying
+     * @param string $listOfFields
+     * @return string
+     */
+    public function GetBoundParamTypeString($listOfFields='*')
+    {
+        if ($listOfFields == '*')
+            $listOfFields = $this->allFieldsWithoutKeys;
+        $myMeta = $this->GetTableMetaAsAssocArray();
+        $boundParamString = '';
+        foreach ($listOfFields as $field) {
+            if (array_key_exists($field, $myMeta)) {
+                $boundParamString .= $myMeta[$field]['BOUND_PARAM_TYPE'];
+            }
+        }
+        return $boundParamString;
+    }
+
+    /**
+     * This function is used for sanitizing data
+     * It probably won't get used much since parameterized queries are now in effect
+     * It could probably use some more work if it is going to be used too
+     * @param $data
+     * @param $fieldMeta
+     * @param bool $boolSanitize
+     * @param bool $boolEncapsulateInQuotes
+     * @return int|mixed|null|string
+     */
     private function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
 
         $filterType = $fieldMeta['FilterTypeNum'];
@@ -156,8 +223,8 @@ Class People EXTENDS Table  {
             }
         }
 
-        $returnValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? null : $fieldValue;
-        $returnValue = $escapeChar.$fieldValue.$escapeChar ;
+        $fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? null : $fieldValue;
+        $fieldValue = $escapeChar.$fieldValue.$escapeChar ;
         return $fieldValue;
     }
 

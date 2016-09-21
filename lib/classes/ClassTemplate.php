@@ -15,6 +15,7 @@ define('METADATA_FIELDNAME_KEY', 'COLUMN_KEY');
 define('METADATA_FIELDNAME_DEFAULT', 'COLUMN_DEFAULT');
 define('METADATA_FIELDNAME_EXTRA', 'EXTRA');
 define('METADATA_FIELDNAME_NUMERIC', 'IS_NUMERIC');
+define('METADATA_FIELDNAME_BOUNDPARAMTYPE', 'BOUND_PARAM_TYPE');
 
 
 
@@ -87,7 +88,20 @@ Class ClassTemplate {
         //Check to see if column is numeric
         if (array_key_exists(METADATA_FIELDNAME_TYPE,$column)){
             $this->columns[$arraySize - 1][METADATA_FIELDNAME_NUMERIC] = in_array(strtolower($column[METADATA_FIELDNAME_TYPE]),$this->dataTypes_numeric);
+
+            //Assign the proper bound parameter type
+            if(in_array(strtolower($column[METADATA_FIELDNAME_TYPE]),$this->dataTypes_boolean) || in_array(strtolower($column[METADATA_FIELDNAME_TYPE]),$this->dataTypes_integer)){
+                $this->columns[$arraySize - 1][METADATA_FIELDNAME_BOUNDPARAMTYPE] = 'i';
+            }elseif(in_array(strtolower($column[METADATA_FIELDNAME_TYPE]),$this->dataTypes_float)){
+                $this->columns[$arraySize - 1][METADATA_FIELDNAME_BOUNDPARAMTYPE] = 'd';
+            }
+            else{
+                $this->columns[$arraySize - 1][METADATA_FIELDNAME_BOUNDPARAMTYPE] = 's';
+            }
         }
+
+
+
     }
 
 
@@ -150,6 +164,8 @@ Class {$this->table} EXTENDS Table  {
 
 {$this->GetDeclaration_ArrayOfFieldValues()}
 
+{$this->GetDeclaration_BoundParamString()}
+
 {$this->GetDeclaration_ReturnFormattedData()}
 
 }
@@ -184,6 +200,7 @@ CLASS_DECLARATION;
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_DEFAULT, 4);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_EXTRA, 4);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_NUMERIC, 4);
+        $output .= $this->ColumnifyString(METADATA_FIELDNAME_BOUNDPARAMTYPE, 4);
         $output .= PHP_EOL;
         $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
@@ -197,6 +214,7 @@ CLASS_DECLARATION;
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_DEFAULT], 4);
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_EXTRA], 4);
             $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_NUMERIC], 4);
+            $output .= $this->ColumnifyString($column[METADATA_FIELDNAME_BOUNDPARAMTYPE], 4);
             $output .= PHP_EOL;
         }
         $output .= PHP_EOL;
@@ -224,6 +242,10 @@ CLASS_DECLARATION;
 
         $declaration=
 <<<LOAD_DECLARATION
+    /**
+    * Will attempt to load up all of this class' members based on the primary key parameter specified
+    * @param $_fieldName
+    */
     public function load(\$param_$_fieldName) {
         \$db = get_db_connection();
         \$sql = 'SELECT * FROM {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
@@ -250,13 +272,25 @@ LOAD_DECLARATION;
         $_tableName = $this->table;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_fieldValue = "\$this->{$_fieldName}";
+
+        $boundParamAddition = ($this->dbType=="MySQL") ? '$currentRecord_numeric = array_unshift($currentRecord_numeric,$this->GetBoundParamTypeString($listOfFields));' : "";
+
         return
 <<<COLUMN_IMPLOSION
+    /**
+     * Will attempt to save the current record
+     * An INSERT will be performed if the primary key for \$this is not already populated
+     * An UPDATE will be performed otherwise
+     * Various options are available within the function (sanitize,quote,includeEmpties,includeNulls)
+     * @param string \$listOfFields --> determines which fields are to be saved
+     * @return bool
+     */
     public function save(\$listOfFields = "*") {
     if (\$listOfFields=='*')
         \$listOfFields=\$this->allFieldsWithoutKeys;
        \$db = get_db_connection();
        \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, \$this::ARRAY_TYPE_NUMERIC, false, false, true, true);
+       $boundParamAddition
        if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
             ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', \$listOfFields ).'{$this->char_escapeNamePost})' .
@@ -317,6 +351,10 @@ COLUMN_IMPLOSION;
     public function GetDeclaration_TableMetadata(){
         $widthInTabStops = 8;
         $template =
+            '    /**' . PHP_EOL .
+            '* Returns an associative array containing metadata about the fields in the table that this class describes' . PHP_EOL .
+            '* @return array' . PHP_EOL .
+            '*/' . PHP_EOL .
             '    private function GetTableMetaAsAssocArray(){' . PHP_EOL .
             '        $record = array(' .PHP_EOL ;
         $countFields = count($this->columns);
@@ -332,7 +370,8 @@ COLUMN_IMPLOSION;
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_KEY.'"=>\''."{$field[METADATA_FIELDNAME_KEY]}'," , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_NUMERIC.'"=>\''."{$field[METADATA_FIELDNAME_NUMERIC]}'," , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>' . $filterTypeNum . ',' , $widthInTabStops + 4);
-            $thisValue .= $this->ColumnifyString('"BoolQuoteWhenPopulating"=>' . $boolQuoteWhenPopulating . ')' . $comma , $widthInTabStops)  . PHP_EOL;
+            $thisValue .= $this->ColumnifyString('"BoolQuoteWhenPopulating"=>' . $boolQuoteWhenPopulating . ',' , $widthInTabStops);
+            $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_BOUNDPARAMTYPE.'"=>\''."{$field[METADATA_FIELDNAME_BOUNDPARAMTYPE]}')" . $comma  , $widthInTabStops)  . PHP_EOL;
             $template .= '			' . $thisField . $thisValue ;
         }
         $template .=
@@ -347,6 +386,18 @@ COLUMN_IMPLOSION;
     public function GetDeclaration_ArrayOfFieldValues(){
         $keyColumns = "'" . implode('\',\'' , $this->keyColumnNames) . "'";
         return <<<ARRAY_DECLARATION
+    /**
+     * This function is primarily only invoked privately
+     * Its primary purpose is to return a list of values when given a list of field names
+     * It contains a number of options that can be set via parameters
+     * @param string \$listOfFields
+     * @param int \$arrayType
+     * @param bool \$boolUseSanitizeFilters
+     * @param bool \$boolEncapsulateInQuotes
+     * @param bool \$boolIncludeEmpties
+     * @param bool \$boolIncludeNulls
+     * @return array
+     */
 	public function GetArrayOfFieldValues(\$listOfFields='*', \$arrayType=$this->table::ARRAY_TYPE_ASSOC, \$boolUseSanitizeFilters=false, \$boolEncapsulateInQuotes=false, \$boolIncludeEmpties=true, \$boolIncludeNulls=true){
 		if (\$listOfFields=='*')
 			\$listOfFields=\$this->allFieldsWithoutKeys;
@@ -377,9 +428,45 @@ ARRAY_DECLARATION;
 
     }
 
+    public function GetDeclaration_BoundParamString(){
+        $array_key_name = METADATA_FIELDNAME_BOUNDPARAMTYPE;
+        return <<<FUNCTION_DECLARATION
+    /**
+     * This function is to be used when a MySQL database is the source of data
+     * It returns bound parameter types to be used to virtually accomplish parameterized querying
+     * @param string \$listOfFields
+     * @return string
+     */
+    public function GetBoundParamTypeString(\$listOfFields='*')
+    {
+        if (\$listOfFields == '*')
+            \$listOfFields = \$this->allFieldsWithoutKeys;
+        \$myMeta = \$this->GetTableMetaAsAssocArray();
+        \$boundParamString = '';
+        foreach (\$listOfFields as \$field) {
+            if (array_key_exists(\$field, \$myMeta)) {
+                \$boundParamString .= \$myMeta[\$field]['$array_key_name'];
+            }
+        }
+        return \$boundParamString;
+    }
+FUNCTION_DECLARATION;
+
+    }
+
 
     public function GetDeclaration_ReturnFormattedData(){
         return <<<'FORMAT_DATA'
+    /**
+     * This function is used for sanitizing data
+     * It probably won't get used much since parameterized queries are now in effect
+     * It could probably use some more work if it is going to be used too
+     * @param $data
+     * @param $fieldMeta
+     * @param bool $boolSanitize
+     * @param bool $boolEncapsulateInQuotes
+     * @return int|mixed|null|string
+     */
 	private function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
 
             $filterType = $fieldMeta['FilterTypeNum'];
