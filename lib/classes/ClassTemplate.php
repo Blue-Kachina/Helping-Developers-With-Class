@@ -256,7 +256,6 @@ LOAD_DECLARATION;
     if (\$listOfFields=='*')
         \$listOfFields=\$this->allFieldsWithoutKeys;
        \$db = get_db_connection();
-       //\$currentRecord_numeric = \$this->GetNumericArrayFromListOfFields(\$listOfFields);
        \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, \$this::ARRAY_TYPE_NUMERIC, false, false, true, true);
        if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.

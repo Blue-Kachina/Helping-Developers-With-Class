@@ -15,6 +15,7 @@ Class DB_Connection {
     public $table;
 
     private $lastErrorMessage;
+	public $lastError;
     public $connection;
     public $result;
 
@@ -60,6 +61,8 @@ Class DB_Connection {
                 $this->lastErrorMessage =
                     "Error: Unable to connect to SQL Server." . PHP_EOL .
                     "Debugging error: " . sqlsrv_errors() . PHP_EOL;
+				$this->lastError = sqlsrv_errors() ;
+					//file_put_contents('logfile.txt.',sqlsrv_errors());
                 return false;
             }
         }
@@ -175,14 +178,23 @@ FETCH_COLUMNS;
             return false;
 
         //$query = "SHOW TABLES";
-        $query =
-            'SELECT DISTINCT TABLE_NAME' . PHP_EOL .
-            'FROM INFORMATION_SCHEMA.TABLES ' . PHP_EOL .
-            'WHERE TABLE_SCHEMA = \'' . $this->database . '\'';
+        $query = <<<QUERY_STRING
+SELECT DISTINCT TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = '{$this->database}'
+QUERY_STRING;
 
 
         $res = mysqli_query($this->connection, $query);
-        return mysqli_fetch_array($res);
+
+
+        $results=array();
+        while ($row = mysqli_fetch_array($res,MYSQLI_NUM)) {
+            $results[] = $row[0];
+        }
+
+        //return mysqli_fetch_array($res);
+        return $results;
     }
 
     private function ReturnTableNames_SQL_Server(){

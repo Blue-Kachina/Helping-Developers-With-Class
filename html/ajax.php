@@ -26,11 +26,12 @@ if (
 
 //create a new database connection
 $connection = new DB_Connection($_POST['serverType'], $_POST['serverAddress'], $_POST['serverUsername'], $_POST['serverPassword'], $_POST['serverDatabase']);
+
 $success = false;
 $msg = "";
 
 $link = $connection->AttemptConnection();
-
+$errorToLog = print_r($connection->lastError, true) ;
 
 //Ensure that any failed connection attempts get reported to the user
 if (!$link) {
@@ -73,6 +74,7 @@ switch ($_POST['action']) {
         $class_load = '';
         $class_save = '';
         $row = array();
+        $serverType = isset($_POST['serverType']) ? $_POST['serverType'] : '';
 
         //Make sure that a table name was passed in
         if (isset($_POST['serverTableName'])) {
@@ -93,7 +95,7 @@ switch ($_POST['action']) {
         $result = $connection->ReturnColumnData();
         //var_dump($result);
             if ($result) {
-                $template = new ClassTemplate($tableName, $result, "MSSQL");
+                $template = new ClassTemplate($tableName, $result, $serverType);
                 $template->SetAllColumns($result);
                 $class_members = $template->GetDeclaration_Members();
                 $class_load = $template->GetDeclaration_Load();
