@@ -239,7 +239,7 @@ CLASS_DECLARATION;
     public function GetDeclaration_Load(){
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_tableName = $this->table;
-
+        $boundParamAddition = ($this->dbType=="MySQL") ? "\$pk_boundParamType," : "";
         $declaration=
 <<<LOAD_DECLARATION
     /**
@@ -247,9 +247,10 @@ CLASS_DECLARATION;
     * @param $_fieldName
     */
     public function load(\$param_$_fieldName) {
+        \$pk_boundParamType = \$this->GetBoundParamTypeString('$_fieldName');
         \$db = get_db_connection();
         \$sql = 'SELECT * FROM {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
-        \$rs = \$db->query(\$sql, null, null, array(\$param_$_fieldName));
+        \$rs = \$db->query(\$sql, null, null, array($boundParamAddition\$param_$_fieldName));
 
         if(\$rs && \$rs->rowCount() > 0) {
             \$row = \$rs->fetch(CoreDB::FETCH_ASSOC);

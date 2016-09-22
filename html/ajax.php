@@ -6,8 +6,8 @@
  * Time: 12:04 AM
  */
 
-require_once(__DIR__ . '/../lib/classes/DBConnection.php');
-require_once(__DIR__ . '/../lib/classes/ClassTemplate.php');
+require_once('../lib/classes/DBConnection.php');
+require_once('../lib/classes/ClassTemplate.php');
 
 if (
     !isset($_POST['serverType'])

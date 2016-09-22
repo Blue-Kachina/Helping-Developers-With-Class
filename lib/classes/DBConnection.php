@@ -62,7 +62,6 @@ Class DB_Connection {
                     "Error: Unable to connect to SQL Server." . PHP_EOL .
                     "Debugging error: " . sqlsrv_errors() . PHP_EOL;
 				$this->lastError = sqlsrv_errors() ;
-					//file_put_contents('logfile.txt.',sqlsrv_errors());
                 return false;
             }
         }
@@ -75,6 +74,7 @@ Class DB_Connection {
     }
 
     public function ReturnCustomQueryResults($query){
+
         $result = mysqli_query($this->connection, $query);
         $this->result= $result;
         if (!$this->result){
