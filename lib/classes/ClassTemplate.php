@@ -247,7 +247,7 @@ CLASS_DECLARATION;
     * @param $_fieldName
     */
     public function load(\$param_$_fieldName) {
-        \$pk_boundParamType = \$this->GetBoundParamTypeString('$_fieldName');
+        \$pk_boundParamType = \$this->GetBoundParamTypeString(array('$_fieldName'));
         \$db = get_db_connection();
         \$sql = 'SELECT * FROM {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
         \$rs = \$db->query(\$sql, null, null, array($boundParamAddition\$param_$_fieldName));
