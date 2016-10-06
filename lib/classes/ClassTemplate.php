@@ -274,7 +274,8 @@ LOAD_DECLARATION;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_fieldValue = "\$this->{$_fieldName}";
 
-        $boundParamAddition = ($this->dbType=="MySQL") ? '$currentRecord_numeric = array_unshift($currentRecord_numeric,$this->GetBoundParamTypeString($listOfFields));' : "";
+        $boundParamAddition = ($this->dbType=="MySQL") ? 'array_unshift($currentRecord_numeric,$this->GetBoundParamTypeString($listOfFields));' : "";
+        $boundParamAddition2 = ($this->dbType=="MySQL") ? "\$currentRecord_numeric[0] = \$currentRecord_numeric[0] . \$this->GetBoundParamTypeString(array('$_fieldName'));" : "";
 
         return
 <<<COLUMN_IMPLOSION
@@ -290,7 +291,7 @@ LOAD_DECLARATION;
     if (\$listOfFields=='*')
         \$listOfFields=\$this->allFieldsWithoutKeys;
        \$db = get_db_connection();
-       \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, \$this::ARRAY_TYPE_NUMERIC, false, false, true, true);
+       \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, $_tableName::ARRAY_TYPE_NUMERIC, false, false, true, true);
        $boundParamAddition
        if (empty(\$this->$_fieldName)) {
            \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
@@ -304,6 +305,7 @@ LOAD_DECLARATION;
 				return false;
 			}
         }else{
+        $boundParamAddition2
             \$sql = 'UPDATE {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} SET ' .
             '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', \$listOfFields ) . '{$this->char_escapeNamePost}=? ' .
 '   WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
@@ -500,7 +502,7 @@ FUNCTION_DECLARATION;
 				}
 			}
 
-			$fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? null : $fieldValue;
+			$fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? 'null' : $fieldValue;
             $fieldValue = $escapeChar.$fieldValue.$escapeChar ;
             return $fieldValue;
     }
