@@ -474,6 +474,7 @@ FUNCTION_DECLARATION;
 
             $filterType = $fieldMeta['FilterTypeNum'];
             $boolAllowsNull = in_array($fieldMeta['IS_NULLABLE'], array('YES',1,true)) ? true : false ;
+            $boolIsDateOrTime = (stristr($fieldMeta['DATA_TYPE'],'date')!== FALSE || stristr($fieldMeta['DATA_TYPE'],'time')!== FALSE );
             $boolRequiresEscape = $fieldMeta['BoolQuoteWhenPopulating'];
 			$boolIsNumeric = $fieldMeta['IS_NUMERIC'];
 
@@ -503,6 +504,7 @@ FUNCTION_DECLARATION;
 			}
 
 			$fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? 'null' : $fieldValue;
+            $fieldValue = ($boolIsDateOrTime && $fieldValue=='') ? null : $fieldValue;
             $fieldValue = $escapeChar.$fieldValue.$escapeChar ;
             return $fieldValue;
     }
