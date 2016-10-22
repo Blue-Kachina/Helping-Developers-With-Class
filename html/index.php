@@ -193,6 +193,7 @@
                 establishDatabaseConnection();
             }
             else if($tabNum == TabEnum.CLASS){
+                $("#class_content").val("");
                 createClassDeclarations();
             }
         }
