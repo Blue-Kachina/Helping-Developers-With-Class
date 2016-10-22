@@ -11,19 +11,14 @@ require_once('../lib/classes/ClassTemplate.php');
 
 if (
     !isset($_POST['serverType'])
-    || !isset($_POST['serverAddress'])
-    || !isset($_POST['serverUsername'])
-    || !isset($_POST['serverPassword'])
-    || !isset($_POST['serverDatabase'])
+    || !isset($_POST['serverAddress']) || empty($_POST['serverAddress'])
+    || !isset($_POST['serverUsername']) || empty($_POST['serverUsername'])
+    || !isset($_POST['serverPassword']) || empty($_POST['serverPassword'])
+    || !isset($_POST['serverDatabase']) || empty($_POST['serverDatabase'])
 ){
 
     header('HTTP/1.1 500 Insufficient Parameters Passed');
     header('Content-Type: application/json; charset=UTF-8');
-    echo json_encode(array(
-            "data" => "",
-            "message" => "Insufficient Parameters Passed"
-        )
-    );
     exit();
 }
 
@@ -42,7 +37,6 @@ $link = $connection->AttemptConnection();
 if (!$link || !empty($connection->GetLastErrorMessage())) {
     header('HTTP/1.1 500 Connection Failed: ' . $connection->GetLastErrorMessage());
     header('Content-Type: application/json; charset=UTF-8');
-    die(json_encode(array("success" => $success,'message' => 'Database connection attempt failed. ' . $connection->GetLastErrorMessage(), 'code' => 1337)));
     exit();
 }
 
@@ -61,7 +55,6 @@ switch ($_POST['action']) {
         if(!$success){
             header('HTTP/1.1 500 Internal Server Booboo - Failed to retrieve any table data');
             header('Content-Type: application/json; charset=UTF-8');
-            json_encode(array("success" => $success,'message' => 'Failed to retrieve table data', 'code' => 1337));
             break;
         }
 
@@ -94,14 +87,13 @@ switch ($_POST['action']) {
         $serverType = isset($_POST['serverType']) ? $_POST['serverType'] : '';
 
         //Make sure that a table name was passed in
-        if (isset($_POST['serverTableName'])) {
+        if (isset($_POST['serverTableName']) && !empty($_POST['serverTableName'])) {
             $tableName = $_POST['serverTableName'];
             $connection->table=$tableName;
         } else {
-            $msg = "No table was selected." . PHP_EOL;
-            header('HTTP/1.1 500 Internal Server Booboo');
+            header('HTTP/1.1 500 No Table Was Selected');
             header('Content-Type: application/json; charset=UTF-8');
-            json_encode(array("success" => $success,'message' => $msg, 'code' => 1337));
+            exit();
         }
 
         $success = true;
@@ -118,6 +110,9 @@ switch ($_POST['action']) {
             }
         else{
             $msg .= $connection->GetLastErrorMessage();
+            header('HTTP/1.1 500 Error retrieving table data: ' . $msg);
+            header('Content-Type: application/json; charset=UTF-8');
+            exit();
         }
 
         //return a JSON encoded array
