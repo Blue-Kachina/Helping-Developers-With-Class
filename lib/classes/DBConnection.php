@@ -136,7 +136,14 @@ Class DB_Connection {
 
         if($this->type == "MySQL") {
             $query =
-                'SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA ' . PHP_EOL .
+                'SELECT 
+                    COLUMN_NAME, 
+                    DATA_TYPE, 
+                    IS_NULLABLE, 
+                    COLUMN_KEY, 
+                    COLUMN_DEFAULT,
+                    CHARACTER_MAXIMUM_LENGTH, 
+                    EXTRA' . PHP_EOL .
                 'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
                 'WHERE TABLE_SCHEMA = \'' . filter_var($this->database, FILTER_SANITIZE_STRING) . '\' AND ' . PHP_EOL .
                 'TABLE_NAME = \'' . filter_var($this->table, FILTER_SANITIZE_STRING) . '\'';

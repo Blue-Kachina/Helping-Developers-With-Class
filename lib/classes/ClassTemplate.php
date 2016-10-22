@@ -358,7 +358,7 @@ COLUMN_IMPLOSION;
             '* Returns an associative array containing metadata about the fields in the table that this class describes' . PHP_EOL .
             '* @return array' . PHP_EOL .
             '*/' . PHP_EOL .
-            '    private function GetTableMetaAsAssocArray(){' . PHP_EOL .
+            '    protected function GetTableMetaAsAssocArray(){' . PHP_EOL .
             '        $record = array(' .PHP_EOL ;
         $countFields = count($this->columns);
         foreach($this->columns as $fieldNum => $field){
@@ -470,7 +470,7 @@ FUNCTION_DECLARATION;
      * @param bool $boolEncapsulateInQuotes
      * @return int|mixed|null|string
      */
-	private function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
+	protected function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
 
             $filterType = $fieldMeta['FilterTypeNum'];
             $boolAllowsNull = in_array($fieldMeta['IS_NULLABLE'], array('YES',1,true)) ? true : false ;
