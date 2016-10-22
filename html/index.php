@@ -289,16 +289,11 @@
 
 
                 },
-                error: function(data){
-                    try{
-                        var result = data;
-
-                        if (result.message != '') {
-                            alert("Class creation attempt made: " + result.message);
-                        }
-                    }catch(err){
-                        throw(err);
+                error: function(xhr, status, error){
+                    if (error != '') {
+                        alert("Class creation failed: " + error);
                     }
+                    /*throw(error);*/
 
                 }
             })
