@@ -1,10 +1,8 @@
 •	Move some functions into the Table.php file
-•	Try to break up the files into pure PHP where possible (maybe I can put code in separate files, and access them via get or something)
+•	Try to break up the files into pure PHP where possible (maybe I can put code in separate files, and access them via get or something) --> Might prove difficult, would have to merge/replace lots of variables, and there would be different elements according to MySQL vs SQLSRV etc...
 •	Make improvements to how the options for functions are used (ini file? bit enumerated constants?)
 •	Add max length into meta data
 •	Return useful error messages -- example data in field is too long, field cannot be left null -->these can be returned prior to the database call being made, and receiving page can handle them accordingly (use list function perhaps in order to get multiple returns?)
 •	Introduce some kind of file auto-updater -- you run this manually, and it somehow manages to non-destructively update your code
 •	incorporate it into the web starter
 •	Introduce some kind of way of  adding per-field-options --> which would need to be handled by a function within the Table.php file
-•	Fix requirement to reload helping-developers-with-class site in order to hit another table
-•	Fix system's inability to provide proper error message feedback when navigating between tabs
