@@ -189,6 +189,7 @@
                 //nothing is really required here
             }
             else if($tabNum == TabEnum.TABLE){
+                $("#selectedTable").empty();
                 establishDatabaseConnection();
             }
             else if($tabNum == TabEnum.CLASS){
@@ -209,22 +210,30 @@
                     serverDatabase: $("#serverDatabase").val()
                 },
                 dataType: "json",
-                success: function( data ) {
-                    if(data.success) {
-                        var newhtml = data.html;
-                        if (data.message != '') {
-                            alert("Connection Attempt Made: " + data.message);
+                success: function(data){
+                    try {
+                        var result = data; //formerly did JSON.parse
+                        if (result.success){
+                            var newhtml = result.html;
+                            if(result.message != ''){
+                                alert("Connection attempt made: " + result.message);
+                            }
+                            $("#divTableList").html(newhtml);
+                        }else{
+                            if (result.message != '') {
+                                throw('Connection attempt made: ' + result.message);
+                            }
                         }
-                        $("#divTableList").replaceWith(newhtml);
+                    } catch (err){
+                        throw(err);
                     }
-                    else
-                    {
-                        if (data.message != '') {
-                            alert("Connection Attempt Made: " + data.message);
-                            event.preventDefault();
+                },
+                error: function(xhr, status, error){
+                        if (error != '') {
+                            alert("Connection Attempt Made: " + error);
                         }
-                        event.preventDefault();
-                    }
+                        /*throw(error);*/
+
                 }
             })
 
@@ -278,6 +287,18 @@
                         event.preventDefault();
                     }
 
+
+                },
+                error: function(data){
+                    try{
+                        var result = data;
+
+                        if (result.message != '') {
+                            alert("Class creation attempt made: " + result.message);
+                        }
+                    }catch(err){
+                        throw(err);
+                    }
 
                 }
             })

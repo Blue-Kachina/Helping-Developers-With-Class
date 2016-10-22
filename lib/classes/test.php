@@ -2,11 +2,11 @@
 /**
  * Created by "Helping Developers With Class".
  * User: BADASSDESKTOP$
- * Timestamp: September 20, 2016, 11:47 pm
+ * Timestamp: October 21, 2016, 10:12 pm
  */
 require_once(DIR_ROOT . '/lib/classes/tables/Table.php');
 
-Class Log EXTENDS Table  {
+Class revenue EXTENDS Table  {
 
     const FILTER_TYPE_NONE = 0;
     const FILTER_TYPE_BOOL = 1;
@@ -19,26 +19,22 @@ Class Log EXTENDS Table  {
     const ARRAY_TYPE_BOTH = 3;
 
     const CHAR_ESCAPE_FIELD_VALUE = "'" ;
-    const CHAR_ESCAPE_FIELD_NAME_PRE = "`";
-    const CHAR_ESCAPE_FIELD_NAME_POST = "`";
+    const CHAR_ESCAPE_FIELD_NAME_PRE = "[";
+    const CHAR_ESCAPE_FIELD_NAME_POST = "]";
 
 
 //          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		COLUMN_DEFAULT	EXTRA			IS_NUMERIC		BOUND_PARAM_TYPE
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public $LogID;						//int									NO				PRI								auto_increment	1				i				
-    public $DateTimeEvent;				//datetime								YES																				s				
-    public $LogType;					//varchar								YES																				s				
-    public $ActivityType;				//varchar								YES																				s				
-    public $UserEnter;					//int									YES																1				i				
-    public $Message;					//text									YES																				s				
-    public $ipAddress;					//varchar								YES																				s				
-    public $TankID;						//int									YES																1				i				
-    public $TankRef;					//varchar								YES																				s				
-    public $Entity;						//varchar								YES																				s				
-    public $DataOwner;					//varchar								YES																				s				
+    public $revenueID;					//int									0				1												1				i
+    public $familyID;					//int									1				0												1				i
+    public $std_creation;				//datetime2								1				0																s
+    public $std_modification;			//datetime2								1				0																s
+    public $dateReceived;				//date									1				0																s
+    public $amount;						//decimal								1				0												1				d
+    public $description;				//nvarchar								1				0																s
 
-    public $allFieldNames = array('LogID', 'DateTimeEvent', 'LogType', 'ActivityType', 'UserEnter', 'Message', 'ipAddress', 'TankID', 'TankRef', 'Entity', 'DataOwner');
-    public $allFieldsWithoutKeys = array('DateTimeEvent', 'LogType', 'ActivityType', 'UserEnter', 'Message', 'ipAddress', 'TankID', 'TankRef', 'Entity', 'DataOwner');
+    public $allFieldNames = array('revenueID', 'familyID', 'std_creation', 'std_modification', 'dateReceived', 'amount', 'description');
+    public $allFieldsWithoutKeys = array('familyID', 'std_creation', 'std_modification', 'dateReceived', 'amount', 'description');
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //If you create any properties that aren't associated with a field from this table, please define them underneath this line
@@ -51,17 +47,13 @@ Class Log EXTENDS Table  {
      */
     private function GetTableMetaAsAssocArray(){
         $record = array(
-            'LogID'=>						array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'NO',			"COLUMN_KEY"=>'PRI',			"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
-            'DateTimeEvent'=>				array(		"DATA_TYPE"=>'datetime',				"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'LogType'=>						array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'ActivityType'=>				array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'UserEnter'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
-            'Message'=>						array(		"DATA_TYPE"=>'text',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'ipAddress'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'TankID'=>						array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
-            'TankRef'=>						array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'Entity'=>						array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'DataOwner'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>'YES',			"COLUMN_KEY"=>'',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s')
+            'revenueID'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'0',				"COLUMN_KEY"=>'1',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
+            'familyID'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
+            'std_creation'=>				array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'std_modification'=>			array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'dateReceived'=>				array(		"DATA_TYPE"=>'date',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'amount'=>						array(		"DATA_TYPE"=>'decimal',					"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'1',				"FilterTypeNum"=>$this::FILTER_TYPE_FLOAT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'d'),
+            'description'=>					array(		"DATA_TYPE"=>'nvarchar',				"IS_NULLABLE"=>'1',				"COLUMN_KEY"=>'0',				"IS_NUMERIC"=>'',				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s')
         );
         return $record;
     }
@@ -69,12 +61,13 @@ Class Log EXTENDS Table  {
 
     /**
      * Will attempt to load up all of this class' members based on the primary key parameter specified
-     * @param LogID
+     * @param revenueID
      */
-    public function load($param_LogID) {
+    public function load($param_revenueID) {
+        $pk_boundParamType = $this->GetBoundParamTypeString(array('revenueID'));
         $db = get_db_connection();
-        $sql = 'SELECT * FROM `Log` WHERE `LogID` = ?';
-        $rs = $db->query($sql, null, null, array($param_LogID));
+        $sql = 'SELECT * FROM [revenue] WHERE [revenueID] = ?';
+        $rs = $db->query($sql, null, null, array($param_revenueID));
 
         if($rs && $rs->rowCount() > 0) {
             $row = $rs->fetch(CoreDB::FETCH_ASSOC);
@@ -94,27 +87,28 @@ Class Log EXTENDS Table  {
         if ($listOfFields=='*')
             $listOfFields=$this->allFieldsWithoutKeys;
         $db = get_db_connection();
-        $currentRecord_numeric = $this->GetArrayOfFieldValues($listOfFields, $this::ARRAY_TYPE_NUMERIC, false, false, true, true);
-        $currentRecord_numeric = array_unshift($currentRecord_numeric,$this->GetBoundParamTypeString($listOfFields));
-        if (empty($this->LogID)) {
-            $sql = 'INSERT INTO `Log`'.
-                ' (`'.implode('`, `', $listOfFields ).'`)' .
+        $currentRecord_numeric = $this->GetArrayOfFieldValues($listOfFields, revenue::ARRAY_TYPE_NUMERIC, false, false, true, true);
+
+        if (empty($this->revenueID)) {
+            $sql = 'INSERT INTO [revenue]'.
+                ' (['.implode('], [', $listOfFields ).'])' .
                 ' VALUES ('. str_repeat ( '?,' , count($listOfFields)-1) .'?) ';
             $rs = $db->query($sql, null, null, $currentRecord_numeric);
             if ($rs) {
-                $this->LogID = $db->insertID();
+                $this->revenueID = $db->insertID();
                 return true;
             } else {
                 return false;
             }
         }else{
-            $sql = 'UPDATE `Log` SET ' .
-                '`'.implode('`=?, `', $listOfFields ) . '`=? ' .
-                '   WHERE `LogID` = ?';
-            $currentRecord_numeric[] = $this->LogID;
+
+            $sql = 'UPDATE [revenue] SET ' .
+                '['.implode(']=?, [', $listOfFields ) . ']=? ' .
+                '   WHERE [revenueID] = ?';
+            $currentRecord_numeric[] = $this->revenueID;
             $rs = $db->query($sql, null, null, $currentRecord_numeric);
             if ($rs) {
-                $this->LogID =  $db->insertID();
+                $this->revenueID =  $db->insertID();
                 return true;
             } else {
                 return false;
@@ -134,7 +128,7 @@ Class Log EXTENDS Table  {
      * @param bool $boolIncludeNulls
      * @return array
      */
-    public function GetArrayOfFieldValues($listOfFields='*', $arrayType=Log::ARRAY_TYPE_ASSOC, $boolUseSanitizeFilters=false, $boolEncapsulateInQuotes=false, $boolIncludeEmpties=true, $boolIncludeNulls=true){
+    public function GetArrayOfFieldValues($listOfFields='*', $arrayType=revenue::ARRAY_TYPE_ASSOC, $boolUseSanitizeFilters=false, $boolEncapsulateInQuotes=false, $boolIncludeEmpties=true, $boolIncludeNulls=true){
         if ($listOfFields=='*')
             $listOfFields=$this->allFieldsWithoutKeys;
         $tableMeta=$this->GetTableMetaAsAssocArray();
@@ -195,6 +189,7 @@ Class Log EXTENDS Table  {
 
         $filterType = $fieldMeta['FilterTypeNum'];
         $boolAllowsNull = in_array($fieldMeta['IS_NULLABLE'], array('YES',1,true)) ? true : false ;
+        $boolIsDateOrTime = (stristr($fieldMeta['DATA_TYPE'],'date')!== FALSE || stristr($fieldMeta['DATA_TYPE'],'time')!== FALSE );
         $boolRequiresEscape = $fieldMeta['BoolQuoteWhenPopulating'];
         $boolIsNumeric = $fieldMeta['IS_NUMERIC'];
 
@@ -223,7 +218,8 @@ Class Log EXTENDS Table  {
             }
         }
 
-        $fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? null : $fieldValue;
+        $fieldValue = ($boolIsNumeric && !is_numeric($fieldValue)) ? 'null' : $fieldValue;
+        $fieldValue = ($boolIsDateOrTime && $fieldValue=='') ? null : $fieldValue;
         $fieldValue = $escapeChar.$fieldValue.$escapeChar ;
         return $fieldValue;
     }

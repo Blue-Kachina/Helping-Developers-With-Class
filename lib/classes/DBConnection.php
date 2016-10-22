@@ -58,10 +58,21 @@ Class DB_Connection {
             $connectionInfo = array( "Database"=>$this->database, "UID"=>$this->username, "PWD"=>$this->password);
             $this->connection = sqlsrv_connect($this->address, $connectionInfo);
             if (!$this->connection) {
+
+                $errorString = "";
+                if( ($errors = sqlsrv_errors() ) != null) {
+                    foreach( $errors as $error ) {
+                        $errorString.= PHP_EOL ."~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" . PHP_EOL;
+                        $errorString.= "SQLSTATE: ".$error[ 'SQLSTATE'] .PHP_EOL;
+                        $errorString.= "code: ".$error[ 'code'] .PHP_EOL;
+                        $errorString.= "message: ".$error[ 'message'] .PHP_EOL;
+                    }
+                }
+
                 $this->lastErrorMessage =
                     "Error: Unable to connect to SQL Server." . PHP_EOL .
-                    "Debugging error: " . sqlsrv_errors() . PHP_EOL;
-				$this->lastError = sqlsrv_errors() ;
+                    "Debugging error: " . $errorString . PHP_EOL;
+				$this->lastError = $errorString ;
                 return false;
             }
         }

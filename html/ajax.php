@@ -15,7 +15,10 @@ if (
     || !isset($_POST['serverUsername'])
     || !isset($_POST['serverPassword'])
     || !isset($_POST['serverDatabase'])
-) {
+){
+
+    header('HTTP/1.1 500 Insufficient Parameters Passed');
+    header('Content-Type: application/json; charset=UTF-8');
     echo json_encode(array(
             "data" => "",
             "message" => "Insufficient Parameters Passed"
@@ -31,15 +34,15 @@ $success = false;
 $msg = "";
 
 $link = $connection->AttemptConnection();
-$errorToLog = print_r($connection->lastError, true) ;
+//$errorToLog = print_r($connection->lastError, true) ;
+
+//file_put_contents('c:/temp/phplog.txt',$connection->GetLastErrorMessage());
 
 //Ensure that any failed connection attempts get reported to the user
-if (!$link) {
-    echo json_encode(array(
-            "success" => $success,
-            "message" => $connection->GetLastErrorMessage()
-        )
-    );
+if (!$link || !empty($connection->GetLastErrorMessage())) {
+    header('HTTP/1.1 500 Connection Failed: ' . $connection->GetLastErrorMessage());
+    header('Content-Type: application/json; charset=UTF-8');
+    die(json_encode(array("success" => $success,'message' => 'Database connection attempt failed. ' . $connection->GetLastErrorMessage(), 'code' => 1337)));
     exit();
 }
 
@@ -51,12 +54,26 @@ switch ($_POST['action']) {
 
         //Connection was successful.  Start building HTML that will replace a currently empty div
         $success = true;
+
+        $options = $connection->returnTableNameOptions();
+        $success = $options && !empty($options);
+
+        if(!$success){
+            header('HTTP/1.1 500 Internal Server Booboo - Failed to retrieve any table data');
+            header('Content-Type: application/json; charset=UTF-8');
+            json_encode(array("success" => $success,'message' => 'Failed to retrieve table data', 'code' => 1337));
+            break;
+        }
+
+        //file_put_contents('c:/temp/phplog.txt',$options && !empty($options));
+
         $tableList =
             '<select id="selectedTable" class="form-control">' . PHP_EOL .
-            $connection->returnTableNameOptions() . PHP_EOL .
+            $options . PHP_EOL .
             '</select>' . PHP_EOL;
 
         //return a JSON encoded array that contains detailed information about what just took place in this AJAX call
+        header('Content-Type: application/json');
         echo json_encode(array(
                 "html" => $tableList,
                 "success" => $success,
@@ -82,12 +99,9 @@ switch ($_POST['action']) {
             $connection->table=$tableName;
         } else {
             $msg = "No table was selected." . PHP_EOL;
-            echo json_encode(array(
-                    "success" => $success,
-                    "message" => $msg
-                )
-            );
-            exit();
+            header('HTTP/1.1 500 Internal Server Booboo');
+            header('Content-Type: application/json; charset=UTF-8');
+            json_encode(array("success" => $success,'message' => $msg, 'code' => 1337));
         }
 
         $success = true;
@@ -107,6 +121,7 @@ switch ($_POST['action']) {
         }
 
         //return a JSON encoded array
+        header('Content-Type: application/json');
         echo json_encode(array(
                 "whole" => $class_whole,
                 "members" => $class_members,
