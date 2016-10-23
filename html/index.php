@@ -103,7 +103,7 @@
 
                             <div class="tab-pane" id="class">
                                 <div class="row">
-                                    <h4 class="info-text"> Which part of the class would you like assistance with? </h4>
+                                    <h4 class="info-text"> Which part of the <span id="tableNameTitle"></span> class would you like assistance with? </h4>
                                     <div class="col-sm-10 col-sm-offset-1">
                                          <div class="form-group">
                                              <select class="form-control" name="classPartToGenerate" id="classPartToGenerate" onchange="classPartSelected(this)">
@@ -195,6 +195,7 @@
             else if($tabNum == TabEnum.CLASS){
                 $("#class_content").val("");
                 createClassDeclarations();
+                $('#tableNameTitle').text("'" + $("#selectedTable").val() + "'");
             }
         }
 

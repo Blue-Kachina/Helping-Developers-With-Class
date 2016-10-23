@@ -1,7 +1,7 @@
-•	Add max length into meta data
 •	Return useful error messages -- example data in field is too long, field cannot be left null -->these can be returned prior to the database call being made, and receiving page can handle them accordingly (use list function perhaps in order to get multiple returns?)
 •	Make improvements to how the options for functions are used (ini file? bit enumerated constants?)
 •	Exclude field from save
+•	Optimize GetArrayOfFieldValues --> this should probably return both names and values so that the options that impact its behaviour cannot disturb the harmony that exists between the number of names and values
 
 •	Introduce some kind of file auto-updater -- you run this manually, and it somehow manages to non-destructively update your code
 •	incorporate it into the web starter

@@ -1,5 +1,18 @@
 <?php
 abstract class Table {
+
+    const FILTER_TYPE_NONE = 0;
+    const FILTER_TYPE_BOOL = 1;
+    const FILTER_TYPE_INT = 2;
+    const FILTER_TYPE_FLOAT = 3;
+    const FILTER_TYPE_STRING = 4;
+
+    const ARRAY_TYPE_NUMERIC = 1;
+    const ARRAY_TYPE_ASSOC = 2;
+    const ARRAY_TYPE_BOTH = 3;
+
+
+
     protected $offset = "";
     protected $order = "";
     protected $search = "";
