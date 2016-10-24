@@ -21,9 +21,7 @@ abstract class GeneratedClass EXTENDS Table
     const ARRAY_TYPE_ASSOC = 2;
     const ARRAY_TYPE_BOTH = 3;
 
-    abstract function GetTableMetaAsAssocArray();
-    abstract function Load();
-    abstract function Save();
+    abstract protected function GetTableMetaAsAssocArray();
 
 
     /**
