@@ -137,9 +137,9 @@ Class ClassTemplate {
  * User: $currentUser
  * Timestamp: $currentDateTime
  */
-require_once(DIR_ROOT . '/lib/classes/tables/Table.php');
+require_once(DIR_ROOT . '/lib/classes/tables/GeneratedClass.php');
 
-Class {$this->table} EXTENDS Table  {
+Class {$this->table} EXTENDS GeneratedClass  {
     const CHAR_ESCAPE_FIELD_VALUE = "{$this->char_escapeValue}" ;
     const CHAR_ESCAPE_FIELD_NAME_PRE = "{$this->char_escapeNamePre}";
     const CHAR_ESCAPE_FIELD_NAME_POST = "{$this->char_escapeNamePost}";
@@ -260,8 +260,8 @@ LOAD_DECLARATION;
         $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
         $_fieldValue = "\$this->{$_fieldName}";
 
-        $boundParamAddition = ($this->dbType=="MySQL") ? 'array_unshift($currentRecord_numeric,$this->GetBoundParamTypeString($listOfFields));' : "";
-        $boundParamAddition2 = ($this->dbType=="MySQL") ? "\$currentRecord_numeric[0] = \$currentRecord_numeric[0] . \$this->GetBoundParamTypeString(array('$_fieldName'));" : "";
+        $boundParamAddition = ($this->dbType=="MySQL") ? 'array_unshift($field_values,$this->GetBoundParamTypeString($field_names));' : "";
+        $boundParamAddition2 = ($this->dbType=="MySQL") ? "\$field_values[0] = \$field_values[0] . \$this->GetBoundParamTypeString(array('$_fieldName'));" : "";
 
         return
 <<<COLUMN_IMPLOSION
@@ -277,16 +277,21 @@ LOAD_DECLARATION;
     //If user passes *, then we'll attempt to save all columns (except for the primary key) to the database
     if (\$listOfFields=='*')
         \$listOfFields=\$this->allFieldsWithoutKeys;
+        elseif(!is_array(\$listOfFields)){
+            \$listOfFields = array((string)\$listOfFields);
+        }
        \$db = get_db_connection();
        //Create an indexed array of all the values we're about to save
-       \$currentRecord_numeric = \$this->GetArrayOfFieldValues(\$listOfFields, $_tableName::ARRAY_TYPE_NUMERIC, false, false, true, true);
+       \$nameValuePairs = \$this->GetFieldsAsAssocArray(\$listOfFields);
+       \$field_values = array_values(\$nameValuePairs);
+       \$field_names = array_keys(\$nameValuePairs);
        $boundParamAddition
        if (empty(\$this->$_fieldName)) {
        //INSERT new record when this class's primary key property is empty
            \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
-            ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', \$listOfFields ).'{$this->char_escapeNamePost})' .
-            ' VALUES ('. str_repeat ( '?,' , count(\$listOfFields)-1) .'?) ';
-			\$rs = \$db->query(\$sql, null, null, \$currentRecord_numeric);
+            ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', \$field_names ).'{$this->char_escapeNamePost})' .
+            ' VALUES ('. str_repeat ( '?,' , count(\$field_names)-1) .'?) ';
+			\$rs = \$db->query(\$sql, null, null, \$field_values);
 			if (\$rs) {
 				\$this->$_fieldName = \$db->insertID();
 				return true;
@@ -297,10 +302,10 @@ LOAD_DECLARATION;
         //UPDATE existing record based on this class's primary key
         $boundParamAddition2
             \$sql = 'UPDATE {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} SET ' .
-            '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', \$listOfFields ) . '{$this->char_escapeNamePost}=? ' .
+            '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', \$field_names ) . '{$this->char_escapeNamePost}=? ' .
 '   WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
-        \$currentRecord_numeric[] = $_fieldValue;
-        \$rs = \$db->query(\$sql, null, null, \$currentRecord_numeric);
+        \$field_values[] = $_fieldValue;
+        \$rs = \$db->query(\$sql, null, null, \$field_values);
         if (\$rs) {
             \$this->$_fieldName =  \$db->insertID();
             return true;
