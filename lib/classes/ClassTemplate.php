@@ -359,7 +359,7 @@ COLUMN_IMPLOSION;
         foreach($this->columns as $fieldNum => $field){
             $boolQuoteWhenPopulating = !in_array($field[METADATA_FIELDNAME_TYPE], $this->dataTypes_numeric) ? 1 : 0;
             $filterTypeNum = $this->GetFilterTypeNum($field[METADATA_FIELDNAME_TYPE]);
-            $max_length = (int)$field[METADATA_FIELDNAME_MAX_LENGTH];
+            $max_length = (float)$field[METADATA_FIELDNAME_MAX_LENGTH];
             $is_numeric = (int)$field[METADATA_FIELDNAME_NUMERIC];
             $nullField = $field[METADATA_FIELDNAME_NULL];
             $is_nullable = ($nullField == "YES" || $nullField == '1' )? 1 : 0;

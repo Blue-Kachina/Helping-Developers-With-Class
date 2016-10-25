@@ -142,7 +142,7 @@ Class DB_Connection {
                     IS_NULLABLE, 
                     COLUMN_KEY, 
                     COLUMN_DEFAULT,
-                    CHARACTER_MAXIMUM_LENGTH AS MAX_LENGTH, 
+                    IFNULL(CHARACTER_MAXIMUM_LENGTH,CONCAT(NUMERIC_PRECISION, "." , NUMERIC_SCALE))AS MAX_LENGTH, 
                     EXTRA' . PHP_EOL .
                 'FROM INFORMATION_SCHEMA.COLUMNS ' . PHP_EOL .
                 'WHERE TABLE_SCHEMA = \'' . filter_var($this->database, FILTER_SANITIZE_STRING) . '\' AND ' . PHP_EOL .

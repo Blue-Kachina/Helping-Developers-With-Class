@@ -98,22 +98,22 @@ abstract class GeneratedClass EXTENDS Table
         $filterType = $fieldMeta['FilterTypeNum'];
         switch($filterType){
             case $this::FILTER_TYPE_STRING:
-                $fieldValue = filter_var($data,FILTER_SANITIZE_STRING);
+                $data = strval($data);
                 break;
 
             case $this::FILTER_TYPE_INT:
-                $fieldValue =  filter_var($data,FILTER_SANITIZE_NUMBER_INT);
+                $data =  intval($data);
                 break;
 
             case $this::FILTER_TYPE_FLOAT:
-                $fieldValue =  filter_var($data,FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ;
+                $data =  floatval($data) ;
                 break;
 
             case $this::FILTER_TYPE_BOOL:
-                $fieldValue =  boolval($data) ? 1 : 0 ;
+                $data =  boolval($data) ? 1 : 0 ;
                 break;
         }
-        return $fieldValue;
+        return $data;
     }
 
     /**
@@ -138,10 +138,23 @@ abstract class GeneratedClass EXTENDS Table
      */
     protected function checkForAcceptableStringLength($data, $fieldMeta){
         $max_length = isset($fieldMeta['MAX_LENGTH'])?$fieldMeta['MAX_LENGTH']:0;
-        $actual_length = strlen((string)$data);
-        if($max_length > 0 && $actual_length > $max_length){
-            throw new Exception('Field will not accept as much data as user provided.');
+
+        if($fieldMeta['BOUND_PARAM_TYPE'] === 'd'){
+            list($max_allowed_total,$max_allowed_decimals) = explode('.',$max_length);
+            $max_allowed_wholeNum = ($max_allowed_decimals)?$max_allowed_total-$max_allowed_decimals:$max_allowed_total;
+            list($data_before,$data_after) = explode('.',$data);
+
+            if($max_length > 0 && (strlen($data_before) > $max_allowed_wholeNum || strlen($data_after) > $max_allowed_decimals)){
+                throw new Exception('Field will not accept as much data as user provided.');
+            }
         }
+        else{
+            $actual_length = strlen((string)$data);
+            if($max_length > 0 && $actual_length > $max_length){
+                throw new Exception('Field will not accept as much data as user provided.');
+            }
+        }
+
     }
 
 
@@ -163,7 +176,7 @@ abstract class GeneratedClass EXTENDS Table
         $boolIsNumeric = $fieldMeta['IS_NUMERIC'];
         $escapeChar = ($boolRequiresEscape && $boolEncapsulateInQuotes) ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
 
-        if($boolSanitize){
+        if($boolSanitize && !is_null($data)){
             $data = $this->sanitizeInput($data,$fieldMeta);
         }
 
