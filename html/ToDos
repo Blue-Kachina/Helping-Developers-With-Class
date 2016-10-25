@@ -1,8 +1,5 @@
-•	Optimize GetArrayOfFieldValues --> this should probably return both names and values so that the options that impact its behaviour cannot disturb the harmony that exists between the number of names and values
-•	Return useful error messages -- example data in field is too long, field cannot be left null -->these can be returned prior to the database call being made, and receiving page can handle them accordingly (use list function perhaps in order to get multiple returns?)
+•	Improve how we handle MAX_LENGTH for TSQL --> most likely will have to query for c.precision, c.scale separately, and then put them into MAX_LENGTH when appropriate
 •	Make improvements to how the options for functions are used (ini file? bit enumerated constants?infinite number of params?)
-•	Exclude field from save
-
 
 •	Introduce some kind of file auto-updater -- you run this manually, and it somehow manages to non-destructively update your code
 •	incorporate it into the web starter
