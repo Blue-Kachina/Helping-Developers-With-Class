@@ -28,8 +28,6 @@ Class DB_Connection {
     }
 
     function __destruct(){
-        //if(isset($this->connection))
-        //mysqli_close($this->connection);
     }
 
 
@@ -210,8 +208,6 @@ QUERY_STRING;
         while ($row = mysqli_fetch_array($res,MYSQLI_NUM)) {
             $results[] = $row[0];
         }
-
-        //return mysqli_fetch_array($res);
         return $results;
     }
 
@@ -233,25 +229,4 @@ GET_TABLENAMES;
         }
         return $tableList;
     }
-
-    /*Not Yet Implemented
-    public function sanitizeMe($stringToSanitize){
-        $inputType=gettype($stringToSanitize);
-        switch($inputType){
-            case 'NULL':
-
-            case 'boolean':
-            case 'boolean':
-            case 'boolean':
-            case 'boolean':
-            case 'boolean':
-            case 'boolean':
-            case 'boolean':
-            case 'boolean':
-                break;
-        }
-
-    }
-    */
-
 }
