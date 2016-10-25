@@ -106,7 +106,7 @@ abstract class GeneratedClass EXTENDS Table
 
             case $this::FILTER_TYPE_FLOAT:
                 $max_length = isset($fieldMeta['MAX_LENGTH']) ? $fieldMeta['MAX_LENGTH'] : 0;  //Max length will have been passed in the format of "precision"."scale" (Precision = total number of digits, scale = number of digits after decimal)
-                $max_decimals = intval(strlen(substr(strrchr($max_length, "."), 1)));
+                $max_decimals = substr(strrchr($max_length, "."), 1);
                 $data = number_format((float)$data, $max_decimals, '.', ''); //Format the number as a float with the proper number of digits after the decimal
                 break;
 
