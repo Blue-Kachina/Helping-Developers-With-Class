@@ -163,7 +163,9 @@ Class DB_Connection {
                     ISNULL(i.is_primary_key, 0) 'COLUMN_KEY',
                     c.max_length 'MAX_LENGTH',
                     '' 'COLUMN_DEFAULT',
-                    '' 'EXTRA'
+                    '' 'EXTRA',
+                    c.precision 'precision',
+                    c.scale 'scale'
                 FROM
                     sys.columns c
                 INNER JOIN
@@ -177,6 +179,14 @@ Class DB_Connection {
 FETCH_COLUMNS;
             $stmt = sqlsrv_query( $this->connection, $query );
             while($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_ASSOC)){
+                $precision = isset($row['precision'])?$row['precision']:0;
+                $scale = isset($row['scale'])?$row['scale']:0;
+                $max_length = isset($row['MAX_LENGTH'])?$row['MAX_LENGTH']:0;
+                if($max_length != $precision && $precision > 0){
+                    $row['MAX_LENGTH'] = floatval($precision . '.' . $scale);
+                }
+                unset($row['precision']);
+                unset($row['scale']);
                 $columnList[]=$row;
             }
             return $columnList;

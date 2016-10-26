@@ -1,8 +1,6 @@
-•	Improve how we handle MAX_LENGTH for TSQL --> most likely will have to query for c.precision, c.scale separately, and then put them into MAX_LENGTH when appropriate
 •	Make improvements to how the options for functions are used (ini file? bit enumerated constants?infinite number of params?)
 
 •	Introduce some kind of file auto-updater -- you run this manually, and it somehow manages to non-destructively update your code
 •	incorporate it into the web starter
 
 •	Introduce some kind of way of adding per-field-options --> which would need to be handled by a function within the Table.php file
-•	Try to break up the files into pure PHP where possible (maybe I can put code in separate files, and access them via get or something) --> Might prove difficult, would have to merge/replace lots of variables, and there would be different elements according to MySQL vs SQLSRV etc...
