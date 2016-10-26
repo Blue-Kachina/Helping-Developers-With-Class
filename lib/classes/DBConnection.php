@@ -123,6 +123,26 @@ Class DB_Connection {
         return $tableList;
     }
 
+    //Gets a list of the tables in the selected database.  Returns them as options for within an HTML select element
+    public function returnTableNames()
+    {
+
+        $tableList = "";
+        $allTables = array();
+
+        if(empty($this->type)){
+            return false;
+        }
+        elseif($this->type=="MySQL"){
+            $allTables = $this->ReturnTableNames_MySQL();
+        }
+        elseif($this->type="MSSQL"){
+            $allTables = $this->ReturnTableNames_SQL_Server();
+        }
+
+        return $allTables;
+    }
+
 
 
     public function ReturnColumnData()

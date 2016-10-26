@@ -52,8 +52,8 @@
                                         <label>Type</label>
                                           <select name="serverType" class="form-control" id="serverType">
                                               <option disabled="">- Server Type -</option>
-                                              <option value="MySQL"> MySQL </option>
-                                              <option value="MSSQL" selected="selected"> MS SQL Server </option>
+                                              <option value="MySQL" selected="selected"> MySQL </option>
+                                              <option value="MSSQL"> MS SQL Server </option>
                                           </select>
                                       </div>
                                   </div>
@@ -97,6 +97,18 @@
                                         </div>
                                     </div>
 
+                                </div>
+                                <div class="row">
+                                    <div class="text-center">
+                                        <h4 class="info-text">OR</h4>
+                                    </div>
+
+                                    <div class="col-sm-12">
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-lg btn-warning" onclick="generateAll()">Generate Classes For All Tables</button>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
 
@@ -290,6 +302,45 @@
                     }
 
 
+                },
+                error: function(xhr, status, error){
+                    if (error != '') {
+                        alert("Class creation failed: " + error);
+                    }
+                    /*throw(error);*/
+
+                }
+            })
+
+        }
+
+        function generateAll() {
+            $.ajax({
+                method: "POST",
+                url: "ajax.php",
+                data: {
+                    action: "generate_all",
+                    serverType: $("#serverType").val(),
+                    serverAddress: $("#serverAddress").val(),
+                    serverUsername: $("#serverUsername").val(),
+                    serverPassword: $("#serverPassword").val(),
+                    serverDatabase: $("#serverDatabase").val()
+                },
+                dataType: "json",
+                success: function( data ) {
+
+                    if(data.success) {
+                        if (data.message != '') {
+                            alert("Class creation attempted: " + data.message);
+                        }
+                    }
+                    else
+                    {
+                        if (data.message != '') {
+                            alert("Error: " + data.message);
+                        }
+                        event.preventDefault();
+                    }
                 },
                 error: function(xhr, status, error){
                     if (error != '') {

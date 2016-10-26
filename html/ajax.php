@@ -29,10 +29,6 @@ $success = false;
 $msg = "";
 
 $link = $connection->AttemptConnection();
-//$errorToLog = print_r($connection->lastError, true) ;
-
-//file_put_contents('c:/temp/phplog.txt',$connection->GetLastErrorMessage());
-
 //Ensure that any failed connection attempts get reported to the user
 if (!$link || !empty($connection->GetLastErrorMessage())) {
     header('HTTP/1.1 500 Connection Failed: ' . $connection->GetLastErrorMessage());
@@ -57,8 +53,6 @@ switch ($_POST['action']) {
             header('Content-Type: application/json; charset=UTF-8');
             break;
         }
-
-        //file_put_contents('c:/temp/phplog.txt',$options && !empty($options));
 
         $tableList =
             '<select id="selectedTable" class="form-control">' . PHP_EOL .
@@ -99,7 +93,6 @@ switch ($_POST['action']) {
         $success = true;
 
         $result = $connection->ReturnColumnData();
-        //var_dump($result);
             if ($result) {
                 $template = new ClassTemplate($tableName, $result, $serverType);
                 $template->SetAllColumns($result);
@@ -127,4 +120,64 @@ switch ($_POST['action']) {
             )
         );
         break;
+
+    case 'generate_all':
+
+
+        //User decided to generate all classes - so we'll create them in the "auto-generated-files" folder
+        $row = array();
+        $serverType = isset($_POST['serverType']) ? $_POST['serverType'] : '';
+
+        $tableList = "";
+        $allTables = array();
+
+        $allTables = $connection->returnTableNames();
+
+        //file_put_contents('c:/temp/phplog.txt',var_export($allTables,true));
+
+
+        deleteAllGeneratedFiles();
+        $success = true;
+        $msg="Succesfully generated files";
+
+        foreach($allTables as $tableName){
+            $connection->table=$tableName;
+            $result = $connection->ReturnColumnData();
+            if ($result) {
+                $template = new ClassTemplate($tableName, $result, $serverType);
+                $template->SetAllColumns($result);
+                $class_whole = $template->GetDeclaration_WholeClass();
+                file_put_contents('c:/temp/phplog.txt', $class_whole);
+                $currentPath = __FILE__ ;
+                $withoutAjax = substr($currentPath,0,(strlen($currentPath)-strlen('ajax.php')));
+                $pathToNewFile = $withoutAjax . 'auto-generated-files\\' . $tableName .'.php';
+                //file_put_contents('c:/temp/phplog.txt', $pathToNewFile);
+                $bytesWritten = file_put_contents($pathToNewFile,$class_whole);
+                //file_put_contents('c:/temp/phplog.txt', $bytesWritten);
+
+            } else {
+                $msg .= $connection->GetLastErrorMessage();
+                header('HTTP/1.1 500 Error retrieving table data: ' . $msg);
+                header('Content-Type: application/json; charset=UTF-8');
+                exit();
+            }
+        }
+
+        //return a JSON encoded array
+        header('Content-Type: application/json');
+        echo json_encode(array(
+                "success" => $success,
+                "message" => $msg
+            )
+        );
+        break;
+}
+
+function deleteAllGeneratedFiles(){
+    $files = glob('auto-generated-files/*'); // get all file names
+    //file_put_contents('c:/temp/phplog.txt','Made it to delete');
+    foreach($files as $file){ // iterate files
+        if(is_file($file))
+            unlink($file); // delete file
+    }
 }
