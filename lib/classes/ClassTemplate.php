@@ -256,8 +256,8 @@ LOAD_DECLARATION;
      * Will attempt to save the current record
      * An INSERT will be performed if the primary key for \$this is not already populated
      * An UPDATE will be performed otherwise
-     * Various options are available within the function (sanitize,quote,includeEmpties,includeNulls)
-     * @param string \$listOfFields --> determines which fields are to be saved
+     * Various options will be available within the function --> still under construction(sanitize,quote,includeEmpties,includeNulls)
+     * @param string/array \$listOfFields --> determines which fields are to be saved (single fieldname string or indexed array of fieldnames)
      * @return bool
      */
     public function save(\$listOfFields = "*") {
@@ -268,7 +268,7 @@ LOAD_DECLARATION;
             \$listOfFields = array((string)\$listOfFields);
         }
        \$db = get_db_connection();
-       //Create an indexed array of all the values we're about to save
+       //Create an assoc array of all the values we're about to save
        \$nameValuePairs = \$this->GetFieldsAsAssocArray(\$listOfFields);
        \$field_values = array_values(\$nameValuePairs);
        \$field_names = array_keys(\$nameValuePairs);
