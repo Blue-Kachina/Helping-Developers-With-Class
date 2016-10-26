@@ -37,9 +37,6 @@ Class ClassTemplate {
     private $dataTypes_float=array('float','double','decimal','real','numeric','money','smallmoney');
 
 
-
-
-
     /**
      * @param $param_table
      * @param array $param_columns
@@ -68,8 +65,6 @@ Class ClassTemplate {
             $this->AddColumn($column);
         }
     }
-
-
 
 
     /**
@@ -104,8 +99,6 @@ Class ClassTemplate {
 
 
     }
-
-
 
 
     /**
@@ -143,6 +136,8 @@ Class {$this->table} EXTENDS GeneratedClass  {
     const CHAR_ESCAPE_FIELD_VALUE = "{$this->char_escapeValue}" ;
     const CHAR_ESCAPE_FIELD_NAME_PRE = "{$this->char_escapeNamePre}";
     const CHAR_ESCAPE_FIELD_NAME_POST = "{$this->char_escapeNamePost}";
+    
+    protected \$fields_excluded_locally = array();
 
 {$this->GetDeclaration_Members()}
 
@@ -155,9 +150,6 @@ Class {$this->table} EXTENDS GeneratedClass  {
 }
 CLASS_DECLARATION;
     }
-
-
-
 
 
 
@@ -217,8 +209,6 @@ CLASS_DECLARATION;
 
 
 
-
-
     /**
      * @return string
      */
@@ -246,9 +236,6 @@ CLASS_DECLARATION;
 LOAD_DECLARATION;
         return $declaration;
     }
-
-
-
 
 
 
@@ -319,8 +306,6 @@ COLUMN_IMPLOSION;
 
 
 
-
-
     /**
      * @param $dataType
      * @return string
@@ -337,9 +322,6 @@ COLUMN_IMPLOSION;
                 return '$this::FILTER_TYPE_STRING';
         }
     }
-
-
-
 
 
 
@@ -384,8 +366,6 @@ COLUMN_IMPLOSION;
 
         return $template;
     }
-
-
 
 
 
