@@ -105,7 +105,7 @@
 
                                     <div class="col-sm-12">
                                         <div class="text-center">
-                                            <button type="button" class="btn btn-lg btn-warning" onclick="generateAll()">Generate Classes For All Tables</button>
+                                            <button type="button" class="btn btn-warning btn-fill btn-wd" onclick="generateAll()">Generate Classes For All Tables</button>
                                         </div>
 
                                     </div>
@@ -187,11 +187,13 @@
         var $tabNum = 1;
 
         function nextBtn(){
+            event.preventDefault();
             $tabNum++;
             performPageSpecificLogic();
         }
 
         function prevBtn(){
+            event.preventDefault();
             $tabNum--;
             performPageSpecificLogic();
         }
@@ -315,6 +317,7 @@
         }
 
         function generateAll() {
+            event.preventDefault();
             $.ajax({
                 method: "POST",
                 url: "ajax.php",
@@ -331,7 +334,7 @@
 
                     if(data.success) {
                         if (data.message != '') {
-                            alert("Class creation attempted: " + data.message);
+                            alert("Class file generation attempted: " + data.message);
                         }
                     }
                     else
@@ -344,7 +347,7 @@
                 },
                 error: function(xhr, status, error){
                     if (error != '') {
-                        alert("Class creation failed: " + error);
+                        alert("Class file creation failed: " + error);
                     }
                     /*throw(error);*/
 

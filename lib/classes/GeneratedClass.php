@@ -186,6 +186,12 @@ abstract class GeneratedClass EXTENDS Table
         $boolIsNumeric = $fieldMeta['IS_NUMERIC'];
         $escapeChar = ($boolRequiresEscape && $boolEncapsulateInQuotes) ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
 
+
+        if ($fieldMeta['BOUND_PARAM_TYPE']=='s' && $data==''){ //Since CoreDB currently won't allow saving empty strings to 's' fields that don't allow NULLs, I should follow suit with my rules here too.
+            $data=null;
+        }
+
+
         if($boolSanitize && !is_null($data)){
             $data = $this->sanitizeInput($data,$fieldMeta);
         }
