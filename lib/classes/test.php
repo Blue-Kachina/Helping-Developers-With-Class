@@ -1,26 +1,27 @@
 <?php
 /**
  * Created by "Helping Developers With Class".
- * User: BADASSDESKTOP$
- * Timestamp: October 22, 2016, 10:09 pm
+ * User: WEBDEV$
+ * Timestamp: October 24, 2016, 2:29 pm
  */
-require_once(DIR_ROOT . '/lib/classes/tables/Table.php');
+require_once(DIR_ROOT . '/lib/classes/tables/GeneratedClass.php');
 
-Class child_revenue EXTENDS Table  {
+Class test EXTENDS GeneratedClass  {
     const CHAR_ESCAPE_FIELD_VALUE = "'" ;
-    const CHAR_ESCAPE_FIELD_NAME_PRE = "[";
-    const CHAR_ESCAPE_FIELD_NAME_POST = "]";
+    const CHAR_ESCAPE_FIELD_NAME_PRE = "`";
+    const CHAR_ESCAPE_FIELD_NAME_POST = "`";
 
 
 //          COLUMN_NAME					DATA_TYPE								IS_NULLABLE		COLUMN_KEY		MAX_LENGTH		COLUMN_DEFAULT			EXTRA						IS_NUMERIC		BOUND_PARAM_TYPE
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public $childID;					//int									0				1				4																	1				i
-    public $revenueID;					//int									0				1				4																	1				i
-    public $std_creation;				//datetime2								1				0				8																					s
-    public $std_modification;			//datetime2								1				0				8																					s
+    public $test_pk;					//int									NO				PRI														auto_increment				1				i
+    public $creationDateTime;			//timestamp								YES												CURRENT_TIMESTAMP													s
+    public $modifiedDateTime;			//timestamp								YES												CURRENT_TIMESTAMP		on update CURRENT_TIMESTAMP					s
+    public $testName;					//varchar								YES								100																					s
+    public $cannotBeNull;				//varchar								NO								45																					s
 
-    public $allFieldNames = array('childID', 'revenueID', 'std_creation', 'std_modification');
-    public $allFieldsWithoutKeys = array('std_creation', 'std_modification');
+    public $allFieldNames = array('test_pk', 'creationDateTime', 'modifiedDateTime', 'testName', 'cannotBeNull');
+    public $allFieldsWithoutKeys = array('creationDateTime', 'modifiedDateTime', 'testName', 'cannotBeNull');
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //If you create any properties that aren't associated with a field from this table, please define them underneath this line
@@ -33,10 +34,11 @@ Class child_revenue EXTENDS Table  {
      */
     protected function GetTableMetaAsAssocArray(){
         $record = array(
-            'childID'=>						array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'1',				"MAX_LENGTH"=>4,				"IS_NUMERIC"=>1,				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
-            'revenueID'=>					array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'1',				"MAX_LENGTH"=>4,				"IS_NUMERIC"=>1,				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
-            'std_creation'=>				array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'0',				"MAX_LENGTH"=>8,				"IS_NUMERIC"=>0,				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
-            'std_modification'=>			array(		"DATA_TYPE"=>'datetime2',				"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'0',				"MAX_LENGTH"=>8,				"IS_NUMERIC"=>0,				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s')
+            'test_pk'=>						array(		"DATA_TYPE"=>'int',						"IS_NULLABLE"=>0,				"COLUMN_KEY"=>'PRI',			"MAX_LENGTH"=>0,				"IS_NUMERIC"=>1,				"FilterTypeNum"=>$this::FILTER_TYPE_INT,		"BoolQuoteWhenPopulating"=>0,	"BOUND_PARAM_TYPE"=>'i'),
+            'creationDateTime'=>			array(		"DATA_TYPE"=>'timestamp',				"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'',				"MAX_LENGTH"=>0,				"IS_NUMERIC"=>0,				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'modifiedDateTime'=>			array(		"DATA_TYPE"=>'timestamp',				"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'',				"MAX_LENGTH"=>0,				"IS_NUMERIC"=>0,				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'testName'=>					array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>1,				"COLUMN_KEY"=>'',				"MAX_LENGTH"=>100,				"IS_NUMERIC"=>0,				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s'),
+            'cannotBeNull'=>				array(		"DATA_TYPE"=>'varchar',					"IS_NULLABLE"=>0,				"COLUMN_KEY"=>'',				"MAX_LENGTH"=>45,				"IS_NUMERIC"=>0,				"FilterTypeNum"=>$this::FILTER_TYPE_STRING,		"BoolQuoteWhenPopulating"=>1,	"BOUND_PARAM_TYPE"=>'s')
         );
         return $record;
     }
@@ -44,13 +46,13 @@ Class child_revenue EXTENDS Table  {
 
     /**
      * Will attempt to load up all of this class' members based on the primary key parameter specified
-     * @param childID
+     * @param test_pk
      */
-    public function load($param_childID) {
-        $pk_boundParamType = $this->GetBoundParamTypeString(array('childID'));
+    public function load($param_test_pk) {
+        $pk_boundParamType = $this->GetBoundParamTypeString(array('test_pk'));
         $db = get_db_connection();
-        $sql = 'SELECT * FROM [child_revenue] WHERE [childID] = ?';
-        $rs = $db->query($sql, null, null, array($param_childID));
+        $sql = 'SELECT * FROM `test` WHERE `test_pk` = ?';
+        $rs = $db->query($sql, null, null, array($pk_boundParamType,$param_test_pk));
 
         if($rs && $rs->rowCount() > 0) {
             $row = $rs->fetch(CoreDB::FETCH_ASSOC);
@@ -70,32 +72,37 @@ Class child_revenue EXTENDS Table  {
         //If user passes *, then we'll attempt to save all columns (except for the primary key) to the database
         if ($listOfFields=='*')
             $listOfFields=$this->allFieldsWithoutKeys;
+        elseif(!is_array($listOfFields)){
+            $listOfFields = array((string)$listOfFields);
+        }
         $db = get_db_connection();
         //Create an indexed array of all the values we're about to save
-        $currentRecord_numeric = $this->GetArrayOfFieldValues($listOfFields, child_revenue::ARRAY_TYPE_NUMERIC, false, false, true, true);
-
-        if (empty($this->childID)) {
+        $nameValuePairs = $this->GetFieldsAsAssocArray($listOfFields);
+        $field_values = array_values($nameValuePairs);
+        $field_names = array_keys($nameValuePairs);
+        array_unshift($field_values,$this->GetBoundParamTypeString($field_names));
+        if (empty($this->test_pk)) {
             //INSERT new record when this class's primary key property is empty
-            $sql = 'INSERT INTO [child_revenue]'.
-                ' (['.implode('], [', $listOfFields ).'])' .
-                ' VALUES ('. str_repeat ( '?,' , count($listOfFields)-1) .'?) ';
-            $rs = $db->query($sql, null, null, $currentRecord_numeric);
+            $sql = 'INSERT INTO `test`'.
+                ' (`'.implode('`, `', $field_names ).'`)' .
+                ' VALUES ('. str_repeat ( '?,' , count($field_names)-1) .'?) ';
+            $rs = $db->query($sql, null, null, $field_values);
             if ($rs) {
-                $this->childID = $db->insertID();
+                $this->test_pk = $db->insertID();
                 return true;
             } else {
                 return false;
             }
         }else{
             //UPDATE existing record based on this class's primary key
-
-            $sql = 'UPDATE [child_revenue] SET ' .
-                '['.implode(']=?, [', $listOfFields ) . ']=? ' .
-                '   WHERE [childID] = ?';
-            $currentRecord_numeric[] = $this->childID;
-            $rs = $db->query($sql, null, null, $currentRecord_numeric);
+            $field_values[0] = $field_values[0] . $this->GetBoundParamTypeString(array('test_pk'));
+            $sql = 'UPDATE `test` SET ' .
+                '`'.implode('`=?, `', $field_names ) . '`=? ' .
+                '   WHERE `test_pk` = ?';
+            $field_values[] = $this->test_pk;
+            $rs = $db->query($sql, null, null, $field_values);
             if ($rs) {
-                $this->childID =  $db->insertID();
+                $this->test_pk =  $db->insertID();
                 return true;
             } else {
                 return false;

@@ -132,10 +132,6 @@ switch ($_POST['action']) {
         $allTables = array();
 
         $allTables = $connection->returnTableNames();
-
-        //file_put_contents('c:/temp/phplog.txt',var_export($allTables,true));
-
-
         deleteAllGeneratedFiles();
         $success = true;
         $msg="Succesfully generated files";
@@ -151,9 +147,7 @@ switch ($_POST['action']) {
                 $currentPath = __FILE__ ;
                 $withoutAjax = substr($currentPath,0,(strlen($currentPath)-strlen('ajax.php')));
                 $pathToNewFile = $withoutAjax . 'auto-generated-files\\' . $tableName .'.php';
-                //file_put_contents('c:/temp/phplog.txt', $pathToNewFile);
                 $bytesWritten = file_put_contents($pathToNewFile,$class_whole);
-                //file_put_contents('c:/temp/phplog.txt', $bytesWritten);
 
             } else {
                 $msg .= $connection->GetLastErrorMessage();
@@ -175,7 +169,6 @@ switch ($_POST['action']) {
 
 function deleteAllGeneratedFiles(){
     $files = glob('auto-generated-files/*'); // get all file names
-    //file_put_contents('c:/temp/phplog.txt','Made it to delete');
     foreach($files as $file){ // iterate files
         if(is_file($file))
             unlink($file); // delete file
