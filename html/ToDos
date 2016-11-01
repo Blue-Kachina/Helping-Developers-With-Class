@@ -1,3 +1,8 @@
+• Try to move the Save() and Load() into the GeneratedClass.php -- will require some modifications (store tablename in class etc...) -->This will make updates much easier!
+• Move "protected $fields_excluded_locally = array();" under the line
+• Create a simple Save() and Load() function in the generated file -- they will simply just call the parent function though
+• Account for multi-key tables
+
 •	Make improvements to how the options for functions are used (ini file? bit enumerated constants?infinite number of params?)
 
 •	Introduce some kind of file auto-updater -- you run this manually, and it somehow manages to non-destructively update your code
