@@ -281,7 +281,7 @@ CLASS_DECLARATION;
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_MAX_LENGTH.'"=>'."{$max_length}," , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_NUMERIC.'"=>'."{$is_numeric}," , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"FilterTypeNum"=>' . $filterTypeNum . ',' , $widthInTabStops + 4);
-            $thisValue .= $this->ColumnifyString('"BoolQuoteWhenPopulating"=>' . $boolQuoteWhenPopulating . ',' , $widthInTabStops);
+            //$thisValue .= $this->ColumnifyString('"BoolQuoteWhenPopulating"=>' . $boolQuoteWhenPopulating . ',' , $widthInTabStops);
             $thisValue .= $this->ColumnifyString('"'.METADATA_FIELDNAME_BOUNDPARAMTYPE.'"=>\''."{$field[METADATA_FIELDNAME_BOUNDPARAMTYPE]}')" . $comma  , $widthInTabStops)  . PHP_EOL;
             $template .= '			' . $thisField . $thisValue ;
         }

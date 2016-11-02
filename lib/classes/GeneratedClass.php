@@ -224,20 +224,15 @@ abstract class GeneratedClass //EXTENDS Table
      * @param $data
      * @param $fieldMeta
      * @param bool $boolSanitize
-     * @param bool $boolEncapsulateInQuotes
      * @return int|mixed|null|string
      */
-    protected function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false,$boolEncapsulateInQuotes=false){
+    protected function ReturnFormattedData($data,$fieldMeta,$boolSanitize=false){
         $boolIsDateOrTime = (stristr($fieldMeta['DATA_TYPE'],'date')!== FALSE || stristr($fieldMeta['DATA_TYPE'],'time')!== FALSE );
-        $boolRequiresEscape = $fieldMeta['BoolQuoteWhenPopulating'];
         $boolIsNumeric = $fieldMeta['IS_NUMERIC'];
-        $escapeChar = ($boolRequiresEscape && $boolEncapsulateInQuotes) ? $this::CHAR_ESCAPE_FIELD_VALUE : "";
-
 
         if ($fieldMeta['BOUND_PARAM_TYPE']=='s' && $data==''){ //Since CoreDB currently won't allow saving empty strings to 's' fields that don't allow NULLs, I should follow suit with my rules here too.
             $data=null;
         }
-
 
         if($boolSanitize && !is_null($data)){
             $data = $this->sanitizeInput($data,$fieldMeta);
@@ -257,7 +252,6 @@ abstract class GeneratedClass //EXTENDS Table
 
         $data = ($boolIsNumeric && !is_numeric($data)) ? 'null' : $data;
         $data = ($boolIsDateOrTime && $data=='') ? null : $data;
-        $data = $escapeChar.$data.$escapeChar ;
         return $data;
     }
 
