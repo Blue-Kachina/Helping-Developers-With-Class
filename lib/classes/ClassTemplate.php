@@ -25,6 +25,7 @@ Class ClassTemplate {
     private $columns = array();
     private $keyColumnIndexes = array();
     private $keyColumnNames = array();
+    private $autoIncrementingKeys = array();
     private $dbType;
 
     public $char_escapeNamePre = "";
@@ -79,6 +80,10 @@ Class ClassTemplate {
         if (array_key_exists(METADATA_FIELDNAME_KEY,$column) && (strtoupper($column[METADATA_FIELDNAME_KEY])=='PRI' || strtoupper($column[METADATA_FIELDNAME_KEY])=='1')){
             $this->keyColumnIndexes[]= ($arraySize - 1) ;
             $this->keyColumnNames[]= ($column[METADATA_FIELDNAME_FIELD]) ;
+        }
+
+        if(array_key_exists(METADATA_FIELDNAME_KEY,$column) && (strtoupper($column[METADATA_FIELDNAME_EXTRA])=='AUTO_INCREMENT')){
+            $this->autoIncrementingKeys[]=($column[METADATA_FIELDNAME_FIELD]) ;
         }
 
         //Check to see if column is numeric
@@ -139,18 +144,24 @@ Class {$this->table} EXTENDS GeneratedClass  {
     
     protected \$fields_excluded_locally = array();
 
-{$this->GetDeclaration_Members()}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//BEGIN UPDATEABLE SECTION
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+{$this->GetDeclaration_UpdateablePart()}
 
-{$this->GetDeclaration_TableMetadata()}
-
-{$this->GetDeclaration_Load()}
-
-{$this->GetDeclaration_Save()}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//END UPDATEABLE SECTION
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 }
 CLASS_DECLARATION;
     }
 
+
+    public function GetDeclaration_UpdateablePart(){
+        return $this->GetDeclaration_Members() . PHP_EOL . $this->GetDeclaration_TableMetadata();
+    }
 
 
     /**
@@ -168,7 +179,10 @@ CLASS_DECLARATION;
         $widthInTabStops = 10;
 
         //Template the member declaration column headers
-        $output = PHP_EOL;
+        $output = "    public \$TABLENAME = \"{$this->table}\";" . PHP_EOL;
+        $output .="    public \$PRIMARYKEY = array(\"" . implode('","', $this->keyColumnNames) . "\");" . PHP_EOL;
+        $output .="    public \$AUTOINCREMENT = array(\"" . implode('","', $this->autoIncrementingKeys) . "\");" .PHP_EOL;
+        $output .= PHP_EOL . PHP_EOL;
         $output .= $this->ColumnifyString('//          ' . METADATA_FIELDNAME_FIELD, $widthInTabStops);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_TYPE, $widthInTabStops);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_NULL, 4);
@@ -179,7 +193,7 @@ CLASS_DECLARATION;
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_NUMERIC, 4);
         $output .= $this->ColumnifyString(METADATA_FIELDNAME_BOUNDPARAMTYPE, 4);
         $output .= PHP_EOL;
-        $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
+        $output .= '//          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         $output .= PHP_EOL;
 
         //Member definitions (and metadata added into inline comments)
@@ -200,108 +214,7 @@ CLASS_DECLARATION;
         $output .= '    public $allFieldsWithoutKeys = array(\'' . implode('\', \'', $fieldsWithoutKeys) . '\');' . PHP_EOL;
         $output .= PHP_EOL;
 
-        //A message to alert developers who might use this class.  Any non-field related properties that they might add to this class should be added the following comment.  Doing so will allow for easy updates to this class using this utility at a later time
-        $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
-        $output .= '//If you create any properties that aren\'t associated with a field from this table, please define them underneath this line'. PHP_EOL;
-        $output .= '//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' .PHP_EOL;
         return $output;
-    }
-
-
-
-    /**
-     * @return string
-     */
-    public function GetDeclaration_Load(){
-        $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
-        $_tableName = $this->table;
-        $boundParamAddition = ($this->dbType=="MySQL") ? "\$pk_boundParamType," : "";
-        $declaration=
-<<<LOAD_DECLARATION
-    /**
-    * Will attempt to load up all of this class' members based on the primary key parameter specified
-    * @param $_fieldName
-    */
-    public function load(\$param_$_fieldName) {
-        \$pk_boundParamType = \$this->GetBoundParamTypeString(array('$_fieldName'));
-        \$db = get_db_connection();
-        \$sql = 'SELECT * FROM {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
-        \$rs = \$db->query(\$sql, null, null, array($boundParamAddition\$param_$_fieldName));
-
-        if(\$rs && \$rs->rowCount() > 0) {
-            \$row = \$rs->fetch(CoreDB::FETCH_ASSOC);
-            \$this->loadFromArray(\$row);
-        }
-    }
-LOAD_DECLARATION;
-        return $declaration;
-    }
-
-
-
-    /**
-     * @return string
-     */
-    public function GetDeclaration_Save(){
-        $_tableName = $this->table;
-        $_fieldName = $this->columns[$this->keyColumnIndexes[0]][METADATA_FIELDNAME_FIELD];
-        $_fieldValue = "\$this->{$_fieldName}";
-
-        $boundParamAddition = ($this->dbType=="MySQL") ? 'array_unshift($field_values,$this->GetBoundParamTypeString($field_names));' : "";
-        $boundParamAddition2 = ($this->dbType=="MySQL") ? "\$field_values[0] = \$field_values[0] . \$this->GetBoundParamTypeString(array('$_fieldName'));" : "";
-
-        return
-<<<COLUMN_IMPLOSION
-    /**
-     * Will attempt to save the current record
-     * An INSERT will be performed if the primary key for \$this is not already populated
-     * An UPDATE will be performed otherwise
-     * Various options will be available within the function --> still under construction(sanitize,quote,includeEmpties,includeNulls)
-     * @param string/array \$listOfFields --> determines which fields are to be saved (single fieldname string or indexed array of fieldnames)
-     * @return bool
-     */
-    public function save(\$listOfFields = "*") {
-    //If user passes *, then we'll attempt to save all columns (except for the primary key) to the database
-    if (\$listOfFields=='*')
-        \$listOfFields=\$this->allFieldsWithoutKeys;
-        elseif(!is_array(\$listOfFields)){
-            \$listOfFields = array((string)\$listOfFields);
-        }
-       \$db = get_db_connection();
-       //Create an assoc array of all the values we're about to save
-       \$nameValuePairs = \$this->GetFieldsAsAssocArray(\$listOfFields);
-       \$field_values = array_values(\$nameValuePairs);
-       \$field_names = array_keys(\$nameValuePairs);
-       $boundParamAddition
-       if (empty(\$this->$_fieldName)) {
-       //INSERT new record when this class's primary key property is empty
-           \$sql = 'INSERT INTO {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost}'.
-            ' ({$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}, {$this->char_escapeNamePre}', \$field_names ).'{$this->char_escapeNamePost})' .
-            ' VALUES ('. str_repeat ( '?,' , count(\$field_names)-1) .'?) ';
-			\$rs = \$db->query(\$sql, null, null, \$field_values);
-			if (\$rs) {
-				\$this->$_fieldName = \$db->insertID();
-				return true;
-			} else {
-				return false;
-			}
-        }else{
-        //UPDATE existing record based on this class's primary key
-        $boundParamAddition2
-            \$sql = 'UPDATE {$this->char_escapeNamePre}$_tableName{$this->char_escapeNamePost} SET ' .
-            '{$this->char_escapeNamePre}'.implode('{$this->char_escapeNamePost}=?, {$this->char_escapeNamePre}', \$field_names ) . '{$this->char_escapeNamePost}=? ' .
-'   WHERE {$this->char_escapeNamePre}$_fieldName{$this->char_escapeNamePost} = ?';
-        \$field_values[] = $_fieldValue;
-        \$rs = \$db->query(\$sql, null, null, \$field_values);
-        if (\$rs) {
-            \$this->$_fieldName =  \$db->insertID();
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-COLUMN_IMPLOSION;
     }
 
 
@@ -332,9 +245,9 @@ COLUMN_IMPLOSION;
         $widthInTabStops = 8;
         $template =
             '    /**' . PHP_EOL .
-            '* Returns an associative array containing metadata about the fields in the table that this class describes' . PHP_EOL .
-            '* @return array' . PHP_EOL .
-            '*/' . PHP_EOL .
+            '    * Returns an associative array containing metadata about the fields in the table that this class describes' . PHP_EOL .
+            '    * @return array' . PHP_EOL .
+            '    */' . PHP_EOL .
             '    protected function GetTableMetaAsAssocArray(){' . PHP_EOL .
             '        $record = array(' .PHP_EOL ;
         $countFields = count($this->columns);

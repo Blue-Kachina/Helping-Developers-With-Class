@@ -121,15 +121,11 @@
                                              <select class="form-control" name="classPartToGenerate" id="classPartToGenerate" onchange="classPartSelected(this)">
                                                  <option disabled="" selected="">- Class Part -</option>
                                                  <option value="whole"> Whole Class </option>
-                                                 <option value="members"> Members Only </option>
-                                                 <option value="load"> Load Only </option>
-                                                 <option value="save"> Save Only </option>
+                                                 <option value="update_only"> Update Only </option>
                                              </select>
 
                                              <input type="hidden" id="class_whole">
-                                             <input type="hidden" id="class_members">
-                                             <input type="hidden" id="class_load">
-                                             <input type="hidden" id="class_save">
+                                             <input type="hidden" id="class_update_only">
 
                                             <textarea class="form-control" placeholder="" rows="8" id="class_content">
                                                 
@@ -276,16 +272,12 @@
 
                     if(data.success) {
                         var class_whole = data.whole;
-                        var class_members = data.members;
-                        var class_load = data.load;
-                        var class_save = data.save;
+                        var update_only = data.update_only;
                         if (data.message != '') {
                             alert("Class creation attempted: " + data.message);
                         }
                         $("#class_whole").val(class_whole);
-                        $("#class_members").val(class_members);
-                        $("#class_load").val(class_load);
-                        $("#class_save").val(class_save);
+                        $("#class_update_only").val(update_only);
 
                         $("#class_content").val(class_whole);
 

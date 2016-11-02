@@ -74,7 +74,7 @@ switch ($_POST['action']) {
 
         $tableName = '';
         $class_whole = '';
-        $class_members = '';
+        $update_only = '';
         $class_load = '';
         $class_save = '';
         $row = array();
@@ -95,10 +95,9 @@ switch ($_POST['action']) {
         $result = $connection->ReturnColumnData();
             if ($result) {
                 $template = new ClassTemplate($tableName, $result, $serverType);
-                $template->SetAllColumns($result);
-                $class_members = $template->GetDeclaration_Members();
-                $class_load = $template->GetDeclaration_Load();
-                $class_save = $template->GetDeclaration_Save();
+                $update_only = $template->GetDeclaration_UpdateablePart();
+                //$class_load = $template->GetDeclaration_Load();
+                //$class_save = $template->GetDeclaration_Save();
                 $class_whole = $template->GetDeclaration_WholeClass();
             }
         else{
@@ -112,9 +111,7 @@ switch ($_POST['action']) {
         header('Content-Type: application/json');
         echo json_encode(array(
                 "whole" => $class_whole,
-                "members" => $class_members,
-                "load" => $class_load,
-                "save" => $class_save,
+                "update_only" => $update_only,
                 "success" => $success,
                 "message" => $msg
             )

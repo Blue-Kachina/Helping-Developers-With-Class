@@ -183,7 +183,7 @@ Class DB_Connection {
                     ISNULL(i.is_primary_key, 0) 'COLUMN_KEY',
                     c.max_length 'MAX_LENGTH',
                     '' 'COLUMN_DEFAULT',
-                    '' 'EXTRA',
+                    case is_identity WHEN 1 then 'auto_increment' else '' end 'EXTRA',
                     c.precision 'precision',
                     c.scale 'scale'
                 FROM
