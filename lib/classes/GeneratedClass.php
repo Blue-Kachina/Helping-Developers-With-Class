@@ -214,62 +214,78 @@ abstract class GeneratedClass EXTENDS Table
         return $data;
     }
 
+    public function quoteFieldOrTableName($nameToQuote){
+        $escapeCharPre = $this::CHAR_ESCAPE_FIELD_NAME_PRE ;
+        $escapeCharPost = $this::CHAR_ESCAPE_FIELD_NAME_POST ;
+        return $escapeCharPre . $nameToQuote . $escapeCharPost ;
+    }
+
+    public function quoteValue($valueToQuote){
+        $escapeChar = $this::CHAR_ESCAPE_FIELD_VALUE ;
+        return $escapeChar . $valueToQuote . $escapeChar ;
+    }
+
     public function load($primaryKeyData){
-        //parameter could be a single value, or could even be an assoc array of field/value pairs
-        if(empty($primaryKeyData)){
-            throw new Exception('Empty parameter passed to Load() function');
-        }
+        //Depending on the PRIMARYKEY of the table in question, this function's parameter could be a single value, or could even be an assoc array of field/value pairs
         $numPrimaryKeys = count($this->PRIMARYKEY);
-        if (!is_array($primaryKeyData) && $numPrimaryKeys > 1){
+
+        if(empty($primaryKeyData)){ //An empty value was passed as a parameter
+            throw new Exception('Empty parameter passed to Load() function');
+        }elseif (!is_array($primaryKeyData) && $numPrimaryKeys > 1){ //Only one value was passed in as a parameter, when multiple were expected
             throw new Exception('Only one value was passed to Load() function when this class expects data for multiple primary keys');
-        }elseif(!is_array($primaryKeyData)){
+        }elseif(!is_array($primaryKeyData)){ // A single value was passed in, and that's good because the table in question only has one primary key
             $primaryKeyData = array($this->PRIMARYKEY[0]=>$primaryKeyData);
-        }elseif($numPrimaryKeys != count($primaryKeyData)){
+        }elseif($numPrimaryKeys != count($primaryKeyData)){ //An unexpected number of values were passed into this function as a parameter
             throw new Exception(count($primaryKeyData) . " values were passed to Load() function when this class expects " . $numPrimaryKeys);
         }
 
-        $where = 'WHERE ' . implode('=? AND ', $primaryKeyData). ' = ?';
+        $where = 'WHERE ' . implode('=? AND ', $primaryKeyData). ' = ?'; //Create "WHERE fieldName1=? AND fieldName2=?" string
         $keyValues = array_values($primaryKeyData);
+        $pk_boundParamType = $this->GetBoundParamTypeString($this->PRIMARYKEY); // Will get a string like 'issddi' --> useful for MySQL/CoreDB parameterized queries
+        $tableName = $this->quoteFieldOrTableName($this->TABLENAME); //Get tablename and escape it
 
-        $pk_boundParamType = $this->GetBoundParamTypeString($this->PRIMARYKEY);
         $db = get_db_connection();
-        $sql = "SELECT * FROM `{$this->TABLENAME}` $where";
+        $sql = "SELECT * FROM $tableName $where";
         $rs = $db->query($sql, null, null, array($pk_boundParamType,$keyValues));
 
-        if($rs && $rs->rowCount() > 0) {
-            $row = $rs->fetch(CoreDB::FETCH_ASSOC);
-            $this->loadFromArray($row);
+        if($rs) {
+            //ToDo: Add a way to handle when multiple rows are found
+            if($rs->rowCount()){
+                $row = $rs->fetch(CoreDB::FETCH_ASSOC);
+                $this->loadFromArray($row);
+                return true;
+            }else{
+                return false;
+            }
         }
-
-
+        return false;
     }
 
 
     /**
-     * Will attempt to save the current record
+     * Will attempt to save the current record.  Can throw exceptions, so please try() your save()
      * An INSERT will be performed if the primary key for $this is not already populated
      * An UPDATE will be performed otherwise
-     * Various options will be available within the function --> still under construction(sanitize,quote,includeEmpties,includeNulls)
+     * Various options will be available within the function --> still under construction(ie. sanitize,quote,includeEmpties,includeNulls)
      * @param string/array $listOfFields --> determines which fields are to be saved (single fieldname string or indexed array of fieldnames)
      * @return bool
      */
     public function save($listOfFields = "*") {
-        //If user passes *, then we'll attempt to save all columns (except for the primary key) to the database
+        //If user passes *, then we'll attempt to save all columns (except for the primary key(s)) to the database
         if ($listOfFields=='*'){
             //$listOfFields=$this->allFieldsWithoutKeys;
             $listOfFields=array_diff($this->allFieldNames,$this->PRIMARYKEY);
         }
         elseif(!is_array($listOfFields)){
-            $listOfFields = array((string)$listOfFields);
+            $listOfFields = array((string)$listOfFields); //In the event that only a fieldname was passed as a parameter (instead of an array), then we'll turn it into an array so we can continue anyway
         }
         $db = get_db_connection();
         //Create an assoc array of all the values we're about to save
-        $nameValuePairs = $this->GetFieldsAsAssocArray($listOfFields);
+        $nameValuePairs = $this->GetFieldsAsAssocArray($listOfFields); //Will remove the fields that are supposed to be excluded, and will even sanitize the data.
         $field_values = array_values($nameValuePairs);
         $field_names = array_keys($nameValuePairs);
 
         array_unshift($field_values,$this->GetBoundParamTypeString($field_names));
-        //file_put_contents('c:/temp/phplog.txt',var_export($field_values,true));
 
         $primaryKeyData = array();
         foreach($this->PRIMARYKEY as $fieldName){
@@ -277,10 +293,8 @@ abstract class GeneratedClass EXTENDS Table
         }
         $pkValues = array_values($primaryKeyData);
         $autoIncrementFieldName = $this->AUTOINCREMENT[0];
-
         $boolAllPrimaryKeysHaveValues = count(array_filter($primaryKeyData)) == count($this->PRIMARYKEY);
         $boolNoPrimaryKeysHaveValues = count(array_filter($primaryKeyData)) == 0;
-
 
         if(!$boolAllPrimaryKeysHaveValues && !$boolNoPrimaryKeysHaveValues){
             throw new Exception('Not all primary keys have a value in "this" object.  Not sure if INSERT or UPDATE is required, and so program was aborted.');
@@ -292,7 +306,7 @@ abstract class GeneratedClass EXTENDS Table
         if ($boolNoPrimaryKeysHaveValues) {
             //INSERT new record when this class's primary key property is empty
             $sql = "INSERT INTO $field_esc_pre{$this->TABLENAME}$field_esc_post".
-                " ($field_esc_pre".implode("$field_esc_post, $field_esc_pre", $field_names )."$field_esc_post)" .
+                " ($field_esc_pre".implode("$field_esc_post, $field_esc_pre", $field_names )."$field_esc_post)" . //Comma Separated list of escaped field names
                 ' VALUES ('. str_repeat ( '?,' , count($field_names)-1) .'?) ';
 
             //file_put_contents('c:/temp/phplog.txt',$sql);
@@ -307,15 +321,16 @@ abstract class GeneratedClass EXTENDS Table
             $where = 'WHERE ' . implode('=? AND ', $primaryKeyData). ' = ?';
 
             //UPDATE existing record based on this class's primary key
-            $field_values[0] = $field_values[0] . $this->GetBoundParamTypeString($this->PRIMARYKEY);
             $sql = "UPDATE $field_esc_pre{$this->TABLENAME}$field_esc_post SET " .
-                "$field_esc_pre".implode("$field_esc_post=?, $field_esc_pre", $field_names ) . "$field_esc_post=? " .
+                "$field_esc_pre".implode("$field_esc_post=?, $field_esc_pre", $field_names ) . "$field_esc_post=? " .//Comma Separated list of escaped field names.  Each field=?
                 "   $where";
-            //$field_values[] = $this->LogID;
+            $field_values[0] = $field_values[0] . $this->GetBoundParamTypeString($this->PRIMARYKEY); //Since we're about to add PRIMARYKEY's values ($pkValues), we'll need to append their 'iissdd'
             $field_values = array_merge($field_values,$pkValues);
             $rs = $db->query($sql, null, null, $field_values);
             if ($rs) {
-                $this->$autoIncrementFieldName =  $db->insertID();
+                if(count($this->$autoIncrementFieldName)){ //If an auto-incrementing field exists in this table
+                    $this->$autoIncrementFieldName =  $db->insertID(); //Then set it equal to the newly generated ID
+                }
                 return true;
             } else {
                 return false;

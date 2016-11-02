@@ -154,6 +154,13 @@ Class {$this->table} EXTENDS GeneratedClass  {
 //END UPDATEABLE SECTION
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    public function load(\$primaryKeyData){
+        parent::load(\$primaryKeyData);
+    }
+
+    public function save(\$listOfFields = "*"){
+        parent::save(\$listOfFields);
+    }
 }
 CLASS_DECLARATION;
     }
