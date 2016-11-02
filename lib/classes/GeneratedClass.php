@@ -8,6 +8,7 @@
  */
 
 require_once ('Table.php');
+require_once (__DIR__ . '/../../../conn.inc.php');
 
 abstract class GeneratedClass //EXTENDS Table
 {
@@ -337,7 +338,8 @@ abstract class GeneratedClass //EXTENDS Table
         $field_values = array_values($nameValuePairs);
         $field_names = array_keys($nameValuePairs);
 
-        array_unshift($field_values,$this->GetBoundParamTypeString($field_names));
+        if(DB_DRIVER=='mysql')
+            array_unshift($field_values,$this->GetBoundParamTypeString($field_names));
 
         $primaryKeyData = array();
         foreach($this->PRIMARYKEY as $fieldName){
@@ -376,7 +378,8 @@ abstract class GeneratedClass //EXTENDS Table
             $sql = "UPDATE $field_esc_pre{$this->TABLENAME}$field_esc_post SET " .
                 "$field_esc_pre".implode("$field_esc_post=?, $field_esc_pre", $field_names ) . "$field_esc_post=? " .//Comma Separated list of escaped field names.  Each field=?
                 "   $where";
-            $field_values[0] = $field_values[0] . $this->GetBoundParamTypeString($this->PRIMARYKEY); //Since we're about to add PRIMARYKEY's values ($pkValues), we'll need to append their 'iissdd'
+            if(DB_DRIVER=='mysql')
+                $field_values[0] = $field_values[0] . $this->GetBoundParamTypeString($this->PRIMARYKEY); //Since we're about to add PRIMARYKEY's values ($pkValues), we'll need to append their 'iissdd'
             $field_values = array_merge($field_values,$pkValues);
             $rs = $db->query($sql, null, null, $field_values);
             if ($rs) {
