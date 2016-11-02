@@ -128,13 +128,18 @@ Class ClassTemplate {
         $currentUser = getenv('USERNAME') ?: getenv('USER');
         $currentDateTime = date("F j, Y, g:i a");
 
+        $version = getVersionInfo();
+
+
+
         return <<<CLASS_DECLARATION
 <?php
 /**
  * Created by "Helping Developers With Class".
- * @version GIT: \$Id$
+ * Version: {$version['version']}
+ * GIT: {$version['git']}
  * User: $currentUser
- * Timestamp: $currentDateTime
+ * Class Creation: $currentDateTime
  */
 require_once(DIR_ROOT . '/lib/classes/tables/GeneratedClass.php');
 
@@ -303,4 +308,20 @@ CLASS_DECLARATION;
         return $myString . $myTrailingTabSpace;
     }
 
+}
+
+function getVersionInfo(){
+
+    $major = 1;
+    $minor = 1;
+    $patch = 1;
+
+    $commitHash = trim(exec('git log --pretty="%h" -n1 HEAD'));
+    $commitDate = exec('git log -n1 --pretty=%ci HEAD');
+
+    $return = array(
+        'version'=>"$major.$minor.$patch-dev",
+        'git'=>"$commitHash - $commitDate"
+        ) ;
+    return $return;
 }
