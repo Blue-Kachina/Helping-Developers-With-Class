@@ -132,6 +132,7 @@ Class ClassTemplate {
 <?php
 /**
  * Created by "Helping Developers With Class".
+ * @version GIT: \$Id$
  * User: $currentUser
  * Timestamp: $currentDateTime
  */
