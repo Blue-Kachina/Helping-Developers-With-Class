@@ -62,6 +62,7 @@ Class ClassTemplate {
             $this->char_escapeValue = "";
         }
 
+        file_put_contents('c:/temp/phplog.txt',var_export($param_columns,true));
         foreach ($param_columns as $columnIndex => $column){
             $this->AddColumn($column);
         }
@@ -161,12 +162,19 @@ Class {$this->table} EXTENDS GeneratedClass  {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     public function load(\$primaryKeyData){
-        parent::load(\$primaryKeyData);
+        return parent::load(\$primaryKeyData);
     }
 
     public function save(\$listOfFields = "*"){
-        parent::save(\$listOfFields);
+        return parent::save(\$listOfFields);
     }
+    
+    public function __construct(\$param_id=""){
+        if(\$param_id > 0){
+            \$this->load(\$param_id);
+        }
+    }
+    
 }
 CLASS_DECLARATION;
     }
@@ -191,8 +199,14 @@ CLASS_DECLARATION;
 
         $widthInTabStops = 10;
 
+        $output = "";
+
+        if(empty($this->autoIncrementingKeys) || !count($this->autoIncrementingKeys)){
+            $output .= "// WARNING -- SAVE FUNCTION WILL NOT WORK WITHOUT IMPLEMENTATION OF AN AUTO_INCREMENT FIELD" . PHP_EOL . PHP_EOL . PHP_EOL;
+        }
+
         //Template the member declaration column headers
-        $output = "    public \$TABLENAME = \"{$this->table}\";" . PHP_EOL;
+        $output .= "    public \$TABLENAME = \"{$this->table}\";" . PHP_EOL;
         $output .="    public \$PRIMARYKEY = array(\"" . implode('","', $this->keyColumnNames) . "\");" . PHP_EOL;
         $output .="    public \$AUTOINCREMENT = array(\"" . implode('","', $this->autoIncrementingKeys) . "\");" .PHP_EOL;
         $output .= PHP_EOL . PHP_EOL;

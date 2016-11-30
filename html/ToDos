@@ -1,8 +1,8 @@
 • Account for multi-key tables
+• Implement a find function ie Bool function FindRecordsInThisTable($nameValuePairs, &$findResults)
 
 •	Make improvements to how the options for functions are used (ini file? bit enumerated constants?infinite number of params?)
 
 •	Introduce some kind of file auto-updater -- you run this manually, and it somehow manages to non-destructively update your code
-•	incorporate it into the web starter
 
 •	Introduce some kind of way of adding per-field-options --> which would need to be handled by a function within the Table.php file

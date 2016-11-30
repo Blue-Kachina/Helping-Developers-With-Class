@@ -138,9 +138,8 @@ switch ($_POST['action']) {
             $result = $connection->ReturnColumnData();
             if ($result) {
                 $template = new ClassTemplate($tableName, $result, $serverType);
-                $template->SetAllColumns($result);
                 $class_whole = $template->GetDeclaration_WholeClass();
-                file_put_contents('c:/temp/phplog.txt', $class_whole);
+                //file_put_contents('c:/temp/phplog.txt', $class_whole);
                 $currentPath = __FILE__ ;
                 $withoutAjax = substr($currentPath,0,(strlen($currentPath)-strlen('ajax.php')));
                 $pathToNewFile = $withoutAjax . 'auto-generated-files\\' . $tableName .'.php';

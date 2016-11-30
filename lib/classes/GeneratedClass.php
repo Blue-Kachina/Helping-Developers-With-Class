@@ -301,7 +301,7 @@ abstract class GeneratedClass //EXTENDS Table
 
         $db = get_db_connection();
         $sql = "SELECT * FROM $tableName $where";
-        $rs = $db->query($sql, null, null, array($pk_boundParamType,$keyValues));
+        $rs = $db->query($sql, null, null, array_merge([$pk_boundParamType],$keyValues));
 
         if($rs) {
             //ToDo: Add a way to handle when multiple rows are found
@@ -372,7 +372,7 @@ abstract class GeneratedClass //EXTENDS Table
                 return false;
             }
         }else{
-            $where = 'WHERE ' . implode('=? AND ', $primaryKeyData). ' = ?';
+            $where = 'WHERE ' . implode('=? AND ', array_keys($primaryKeyData)). ' = ?';
 
             //UPDATE existing record based on this class's primary key
             $sql = "UPDATE $field_esc_pre{$this->TABLENAME}$field_esc_post SET " .
